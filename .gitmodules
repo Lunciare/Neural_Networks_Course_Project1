@@ -1,3 +1,7 @@
 [submodule "eigen"]
 	path = eigen
 	url = https://github.com/PX4/eigen
+
+[submodule "eigenrand"]
+	path = eigenrand
+	url = https://github.com/bab2min/EigenRand.git
