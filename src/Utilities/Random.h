@@ -1,29 +1,25 @@
 #pragma once
-#include <Eigen/Dense>
-#include <random>
+#include "Utilities/LinAlg.h"
 
 namespace neural_network {
 
 class Random {
 public:
-  using Matrix = Eigen::MatrixXd;
-  using Vector = Eigen::VectorXd;
+  explicit Random(std::uint64_t seed);
 
-  explicit Random(int seed = kDefaultSeed);
+  Matrix uniformMatrix(Index rows, Index cols, double a, double b);
+  Vector uniformVector(Index size, double a, double b);
 
-  // Generates a matrix of shape [rows x cols] with uniform random values in [a,
-  // b]
-  Matrix uniformMatrix(size_t rows, size_t cols, double a, double b);
+  Matrix normalMatrix(Index rows, Index cols, double mean, double stddev);
+  Vector normalVector(Index size, double mean, double stddev);
 
-  // Generates a vector of length size with uniform random values in [a, b]
-  Vector uniformVector(size_t size, double a, double b);
+  static Random &global();
 
-  static constexpr int kDefaultSeed = 42;
+  Eigen::Rand::Vmt19937_64 &engine() { return generator_; }
 
 private:
-  std::mt19937 generator_;
+  static constexpr std::uint64_t k_default_seed_ = 42;
+  Eigen::Rand::Vmt19937_64 generator_;
 };
-
-extern Random global_random;
 
 } // namespace neural_network

@@ -9,25 +9,25 @@ Model::Model(const std::vector<size_t> &layer_sizes,
              const Optimizer &optimizer) {
   assert(layer_sizes.size() == activations.size() + 1);
   for (size_t i = 1; i < layer_sizes.size(); ++i) {
-    layers_.emplace_back(layer_sizes[i - 1], layer_sizes[i], activations[i - 1],
-                         optimizer);
+    layers_.emplace_back(In(layer_sizes[i - 1]), Out(layer_sizes[i]),
+                         activations[i - 1], optimizer);
   }
 }
 
-Eigen::VectorXd Model::forward(const Eigen::VectorXd &input) {
-  Eigen::VectorXd x = input;
+Vector Model::forward(const Vector &input) {
+  Vector x = input;
   for (auto &layer : layers_) {
     x = layer.forward(x);
   }
   return x;
 }
 
-void Model::trainStep(const Eigen::VectorXd &x, const Eigen::VectorXd &y) {
-  std::vector<Eigen::VectorXd> activations{x};
+void Model::trainStep(const Vector &x, const Vector &y) {
+  std::vector<Vector> activations{x};
   for (auto &layer : layers_)
     activations.push_back(layer.forward(activations.back()));
 
-  Eigen::VectorXd grad = LossFunction::mseGrad(activations.back(), y);
+  Vector grad = LossFunction::mseGrad(activations.back(), y);
 
   // Backward pass
   for (int i = int(layers_.size()) - 1; i >= 0; --i) {

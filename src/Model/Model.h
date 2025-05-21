@@ -11,10 +11,10 @@ public:
         const std::vector<ActivationFunction::Type> &activations,
         const Optimizer &optimizer);
 
-  Eigen::VectorXd forward(const Eigen::VectorXd &input);
+  Vector forward(const Vector &input);
 
   // One training step: forward, backward and optimizer update
-  void trainStep(const Eigen::VectorXd &x, const Eigen::VectorXd &y);
+  void trainStep(const Vector &x, const Vector &y);
 
   bool save(const std::string &prefix) const;
   bool load(const std::string &prefix);

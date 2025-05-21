@@ -13,7 +13,7 @@ static uint32_t readUint32BE(std::ifstream &in) {
 }
 
 bool loadMNIST(const std::string &image_file, const std::string &label_file,
-               std::vector<Eigen::VectorXd> &images, std::vector<int> &labels) {
+               std::vector<Vector> &images, std::vector<int> &labels) {
   std::ifstream img_f(image_file, std::ios::binary),
       lbl_f(label_file, std::ios::binary);
   if (!img_f.is_open() || !lbl_f.is_open())
@@ -33,7 +33,7 @@ bool loadMNIST(const std::string &image_file, const std::string &label_file,
     img_f.read(reinterpret_cast<char *>(buffer.data()), img_size);
     unsigned char label = 0;
     lbl_f.read(reinterpret_cast<char *>(&label), 1);
-    Eigen::VectorXd vec(img_size);
+    Vector vec(img_size);
     for (size_t j = 0; j < img_size; ++j)
       vec[j] = buffer[j] / 255.0;
     images.push_back(vec);

@@ -2,26 +2,31 @@
 
 namespace neural_network {
 
-Random global_random;
+Random::Random(std::uint64_t seed) : generator_(seed) {}
 
-Random::Random(int seed) : generator_(seed) {}
-
-Random::Matrix Random::uniformMatrix(size_t rows, size_t cols, double a,
-                                     double b) {
-  std::uniform_real_distribution<double> dist(a, b);
-  Matrix mat(rows, cols);
-  for (size_t i = 0; i < rows; ++i)
-    for (size_t j = 0; j < cols; ++j)
-      mat(i, j) = dist(generator_);
-  return mat;
+Matrix Random::uniformMatrix(Index rows, Index cols, double a, double b) {
+  // Используй generator_ как источник случайных чисел
+  return Eigen::Rand::uniformReal<Matrix>(rows, cols, generator_, a, b);
 }
 
-Random::Vector Random::uniformVector(size_t size, double a, double b) {
-  std::uniform_real_distribution<double> dist(a, b);
-  Vector vec(size);
-  for (size_t i = 0; i < size; ++i)
-    vec(i) = dist(generator_);
-  return vec;
+Vector Random::uniformVector(Index size, double a, double b) {
+  // Vector всегда делай как (size, 1) и потом, если надо, .col(0)
+  return Eigen::Rand::uniformReal<Matrix>(size, 1, generator_, a, b);
+}
+
+Matrix Random::normalMatrix(Index rows, Index cols, double mean,
+                            double stddev) {
+  return Eigen::Rand::normal<Matrix>(rows, cols, generator_, mean, stddev);
+}
+
+Vector Random::normalVector(Index size, double mean, double stddev) {
+  return Eigen::Rand::normal<Matrix>(size, 1, generator_, mean, stddev);
+}
+
+// Реализация глобального генератора (singleton)
+Random &Random::global() {
+  static Random instance(k_default_seed_);
+  return instance;
 }
 
 } // namespace neural_network

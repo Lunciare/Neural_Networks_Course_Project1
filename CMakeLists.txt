@@ -16,6 +16,7 @@ set(SOURCES
     src/Layers/Layer.cpp
     src/Model/Model.cpp
     src/Tests/Tests.cpp
+    src/utilities/Random.cpp
 )
 
 add_executable(neural_net
@@ -27,4 +28,5 @@ add_executable(neural_net
     src/Layers/Layer.cpp
     src/Model/Model.cpp
     src/Tests/Tests.cpp
+    src/utilities/Random.cpp
 )

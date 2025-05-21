@@ -10,19 +10,19 @@ namespace test {
 
 bool testActivationFunction() {
   using AF = ActivationFunction;
-  Eigen::VectorXd x(3);
+  Vector x(3);
   x << -1, 0, 2;
-  Eigen::VectorXd y_relu = AF::apply(AF::Type::ReLU, x);
+  Vector y_relu = AF::apply(AF::Type::ReLU, x);
   Eigen::ArrayXd expected(3);
   expected << 0, 0, 2;
   if (!(y_relu.array() == expected).all())
     return false;
 
-  Eigen::VectorXd y_sigmoid = AF::apply(AF::Type::Sigmoid, x);
+  Vector y_sigmoid = AF::apply(AF::Type::Sigmoid, x);
   if (std::abs(y_sigmoid[0] - 0.26894) > 1e-4)
     return false;
 
-  Eigen::VectorXd y_tanh = AF::apply(AF::Type::Tanh, x);
+  Vector y_tanh = AF::apply(AF::Type::Tanh, x);
   if (std::abs(y_tanh[2] - std::tanh(2)) > 1e-8)
     return false;
 
@@ -31,10 +31,10 @@ bool testActivationFunction() {
 
 bool testOptimizerSGD() {
   Optimizer opt(0.1); // SGD
-  Eigen::MatrixXd w = Eigen::MatrixXd::Ones(2, 2);
-  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(2, 2);
-  Eigen::MatrixXd v = Eigen::MatrixXd::Zero(2, 2);
-  Eigen::MatrixXd grad = Eigen::MatrixXd::Ones(2, 2);
+  Matrix w = Matrix::Ones(2, 2);
+  Matrix m = Matrix::Zero(2, 2);
+  Matrix v = Matrix::Zero(2, 2);
+  Matrix grad = Matrix::Ones(2, 2);
 
   opt.update(w, m, v, grad, 1);
   if (std::abs(w(0, 0) - 0.9) > 1e-9)
@@ -44,10 +44,10 @@ bool testOptimizerSGD() {
 
 bool testOptimizerAdam() {
   Optimizer opt(0.1, 0.9, 0.999, 1e-8); // Adam
-  Eigen::MatrixXd w = Eigen::MatrixXd::Ones(1, 1);
-  Eigen::MatrixXd m = Eigen::MatrixXd::Zero(1, 1);
-  Eigen::MatrixXd v = Eigen::MatrixXd::Zero(1, 1);
-  Eigen::MatrixXd grad = Eigen::MatrixXd::Ones(1, 1);
+  Matrix w = Matrix::Ones(1, 1);
+  Matrix m = Matrix::Zero(1, 1);
+  Matrix v = Matrix::Zero(1, 1);
+  Matrix grad = Matrix::Ones(1, 1);
 
   opt.update(w, m, v, grad, 1);
   // Adam first step: delta ≈ 0.1 / (1 / sqrt(1) + 1e-8) ≈ 0.1
@@ -58,15 +58,15 @@ bool testOptimizerAdam() {
 
 bool testLayerForwardBackward() {
   Optimizer opt(0.01, 0.9, 0.999, 1e-8); // Adam
-  Layer l(2, 1, ActivationFunction::Type::Identity, opt);
+  Layer l(In(2), Out(1), ActivationFunction::Type::Identity, opt);
 
-  Eigen::VectorXd input(2);
+  Vector input(2);
   input << 1.0, -1.0;
 
-  Eigen::VectorXd output = l.forward(input);
-  Eigen::VectorXd grad_out(1);
+  Vector output = l.forward(input);
+  Vector grad_out(1);
   grad_out << 1.0;
-  Eigen::VectorXd grad_in = l.backward(grad_out);
+  Vector grad_in = l.backward(grad_out);
   // Just check code runs and output size is correct
   if (grad_in.size() != 2)
     return false;

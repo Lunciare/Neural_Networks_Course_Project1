@@ -1,5 +1,5 @@
 #pragma once
-#include <Eigen/Dense>
+#include "Utilities/LinAlg.h"
 
 namespace neural_network {
 
@@ -9,11 +9,11 @@ public:
   enum class Type { ReLU, Sigmoid, Identity, Tanh };
 
   // Applies the activation function (elementwise) to the input vector.
-  static Eigen::VectorXd apply(Type type, const Eigen::VectorXd &x);
+  static Vector apply(Type type, const Vector &x);
 
   // Computes the derivative of the activation function (elementwise), given the
   // activation output.
-  static Eigen::VectorXd derivative(Type type, const Eigen::VectorXd &y);
+  static Vector derivative(Type type, const Vector &y);
 };
 
 } // namespace neural_network

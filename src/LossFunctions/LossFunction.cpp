@@ -3,15 +3,13 @@
 
 namespace neural_network {
 
-double LossFunction::mse(const Eigen::VectorXd &y_pred,
-                         const Eigen::VectorXd &y_true) {
+double LossFunction::mse(const Vector &y_pred, const Vector &y_true) {
   assert(y_pred.size() == y_true.size());
   auto diff = y_pred - y_true;
   return diff.squaredNorm() / diff.size();
 }
 
-Eigen::VectorXd LossFunction::mseGrad(const Eigen::VectorXd &y_pred,
-                                      const Eigen::VectorXd &y_true) {
+Vector LossFunction::mseGrad(const Vector &y_pred, const Vector &y_true) {
   assert(y_pred.size() == y_true.size());
   return (2.0 / y_pred.size()) * (y_pred - y_true);
 }
