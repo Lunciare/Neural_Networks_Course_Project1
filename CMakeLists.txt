@@ -4,6 +4,7 @@ project(neural_net)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${PROJECT_SOURCE_DIR}/external/eigen)
+include_directories(${PROJECT_SOURCE_DIR}/external/eigenRand)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(SOURCES

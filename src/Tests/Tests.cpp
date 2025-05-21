@@ -13,7 +13,9 @@ bool testActivationFunction() {
   Eigen::VectorXd x(3);
   x << -1, 0, 2;
   Eigen::VectorXd y_relu = AF::apply(AF::Type::ReLU, x);
-  if (!(y_relu.array() == Eigen::ArrayXd({0, 0, 2})).all())
+  Eigen::ArrayXd expected(3);
+  expected << 0, 0, 2;
+  if (!(y_relu.array() == expected).all())
     return false;
 
   Eigen::VectorXd y_sigmoid = AF::apply(AF::Type::Sigmoid, x);
