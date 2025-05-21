@@ -6,9 +6,10 @@
 
 namespace neural_network {
 
-// Fully-connected (dense) neural network layer with activation and optimizer.
+// Fully-connected neural network layer with activation and optimizer.
 class Layer {
 public:
+  // Input and output are column vectors.
   Layer(size_t input_size, size_t output_size,
         ActivationFunction::Type activation, const Optimizer &optimizer);
 
@@ -37,7 +38,7 @@ private:
   Eigen::VectorXd last_input_;
   Eigen::VectorXd last_z_;
 
-  Optimizer optimizer_; // stored by value!
+  Optimizer optimizer_; // stored by value
 
   static Eigen::MatrixXd initWeights(size_t out, size_t in);
   static Eigen::VectorXd initBiases(size_t out);
