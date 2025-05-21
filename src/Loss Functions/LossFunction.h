@@ -1,27 +1,21 @@
 #pragma once
+#include "eigen/Eigen/Dense"
 
-#include <Eigen/Dense>
-#include <functional>
+namespace neural_network
+{
 
-#include "Math.h"
-
-namespace neural_network {
-class LossFunction {
-  using Signature1 = std::function<double(const Matrix &, const Matrix &)>;
-  using Signature2 = std::function<Matrix(const Matrix &, const Matrix &)>;
-  LossFunction(Signature1 f0, Signature2 f1);
-
+// Provides static methods for loss computation (e.g. mean squared error).
+class LossFunction
+{
 public:
-  static LossFunction Euclid();
-  static LossFunction CrossEntropy();
-  static LossFunction CrossEntropyWithLogits();
+    // Computes the Mean Squared Error (MSE) between prediction and target
+    // vectors.
+    static double mse(const Eigen::VectorXd& y_pred,
+                      const Eigen::VectorXd& y_true);
 
-  double dist(const Matrix &x, const Matrix &y) const;
-  Matrix derDist(const Matrix &x, const Matrix &y) const;
-
-private:
-  Signature1 f0_;
-  Signature2 f1_;
+    // Computes the gradient of MSE with respect to y_pred.
+    static Eigen::VectorXd mseGrad(const Eigen::VectorXd& y_pred,
+                                   const Eigen::VectorXd& y_true);
 };
 
-} // namespace neural_network
+}// namespace neural_network

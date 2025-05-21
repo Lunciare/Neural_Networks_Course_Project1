@@ -1,5 +1,12 @@
 #pragma once
 
-namespace neural_network {
-void run_all_tests();
-}
+namespace neural_network
+{
+namespace test
+{
+
+// Returns true if all tests pass, false otherwise
+bool runAllTests();
+
+}// namespace test
+}// namespace neural_network

@@ -1,36 +1,30 @@
-#ifndef MODEL_H
-#define MODEL_H
-
-#include "AnyLayer.h"
-#include "LossFunction.h"
-#include "Optimizer.h"
-#include <string>
+#pragma once
+#include "Layer.h"
 #include <vector>
 
-namespace neural_network {
+namespace neural_network
+{
 
-class Model {
+// Neural network as a sequence of layers with shared optimizer
+class Model
+{
 public:
-  Model();
-  explicit Model(const std::string &model_name);
+    Model(const std::vector<size_t>& layer_sizes,
+          const std::vector<ActivationFunction::Type>& activations,
+          const Optimizer& optimizer);
 
-  void add(AnyLayer *layer);
-  void compile(LossFunction *lossFunction, Optimizer *opt);
-  void train(const std::vector<std::vector<double>> &X,
-             const std::vector<std::vector<double>> &y, int epochs,
-             int batch_size);
+    Eigen::VectorXd forward(const Eigen::VectorXd& input);
 
-  std::vector<std::vector<double>>
-  predict(const std::vector<std::vector<double>> &X);
-  void summary() const;
+    // One training step: forward, backward and optimizer update
+    void trainStep(const Eigen::VectorXd& x, const Eigen::VectorXd& y);
+
+    bool save(const std::string& prefix) const;
+    bool load(const std::string& prefix);
+
+    const std::vector<Layer>& layers() const { return layers_; }
 
 private:
-  std::vector<AnyLayer *> layers;
-  LossFunction *loss;
-  Optimizer *optimizer;
-  std::string name;
+    std::vector<Layer> layers_;
 };
 
-} // namespace neural_network
-
-#endif // MODEL_H
+}// namespace neural_network

@@ -1,64 +1,65 @@
 #include "Model.h"
-#include <algorithm>
-#include <iostream>
+#include "LossFunction.h"
+#include <cassert>
 
-namespace neural_network {
+namespace neural_network
+{
 
-Model::Model() = default;
-
-Model::Model(const std::string &model_name) : name(model_name) {}
-
-void Model::add(AnyLayer *layer) { layers.push_back(layer); }
-
-void Model::compile(LossFunction *lossFunction, Optimizer *opt) {
-  loss = lossFunction;
-  optimizer = opt;
-}
-
-void Model::train(const std::vector<std::vector<double>> &X,
-                  const std::vector<std::vector<double>> &y, int epochs,
-                  int batch_size) {
-  for (int epoch = 0; epoch < epochs; ++epoch) {
-    for (size_t i = 0; i < X.size(); i += batch_size) {
-      std::vector<std::vector<double>> x_batch(
-          X.begin() + i, X.begin() + std::min(X.size(), i + batch_size));
-      std::vector<std::vector<double>> y_batch(
-          y.begin() + i, y.begin() + std::min(y.size(), i + batch_size));
-
-      std::vector<std::vector<double>> output = x_batch;
-      for (auto *layer : layers) {
-        output = layer->forward(output);
-      }
-
-      std::vector<std::vector<double>> grad = loss->derivative(output, y_batch);
-      for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
-        grad = (*it)->backward(grad);
-      }
-
-      for (auto *layer : layers) {
-        layer->updateWeights(*optimizer);
-      }
+Model::Model(const std::vector<size_t>& layer_sizes,
+             const std::vector<ActivationFunction::Type>& activations,
+             const Optimizer& optimizer)
+{
+    assert(layer_sizes.size() == activations.size() + 1);
+    for (size_t i = 1; i < layer_sizes.size(); ++i)
+    {
+        layers_.emplace_back(layer_sizes[i - 1], layer_sizes[i], activations[i - 1],
+                             optimizer);
     }
-    std::cout << "Epoch " << epoch + 1 << " completed." << std::endl;
-  }
 }
 
-std::vector<std::vector<double>>
-Model::predict(const std::vector<std::vector<double>> &X) {
-  std::vector<std::vector<double>> output = X;
-  for (auto *layer : layers) {
-    output = layer->forward(output);
-  }
-  return output;
+Eigen::VectorXd Model::forward(const Eigen::VectorXd& input)
+{
+    Eigen::VectorXd x = input;
+    for (auto& layer: layers_)
+    {
+        x = layer.forward(x);
+    }
+    return x;
 }
 
-void Model::summary() const {
-  std::cout << "Model summary: " << name << std::endl;
-  std::cout << "Number of layers: " << layers.size() << std::endl;
-  for (size_t i = 0; i < layers.size(); ++i) {
-    std::cout << "  Layer " << i + 1 << ": " << typeid(*layers[i]).name()
-              << std::endl;
-  }
+void Model::trainStep(const Eigen::VectorXd& x, const Eigen::VectorXd& y)
+{
+    std::vector<Eigen::VectorXd> activations{x};
+    for (auto& layer: layers_)
+        activations.push_back(layer.forward(activations.back()));
+
+    Eigen::VectorXd grad = LossFunction::mseGrad(activations.back(), y);
+
+    // Backward pass
+    for (int i = int(layers_.size()) - 1; i >= 0; --i)
+    {
+        grad = layers_[i].backward(grad);
+    }
 }
 
-} // namespace neural_network
+bool Model::save(const std::string& prefix) const
+{
+    for (size_t i = 0; i < layers_.size(); ++i)
+    {
+        if (!layers_[i].saveWeights(prefix + "_layer" + std::to_string(i) + ".txt"))
+            return false;
+    }
+    return true;
+}
+
+bool Model::load(const std::string& prefix)
+{
+    for (size_t i = 0; i < layers_.size(); ++i)
+    {
+        if (!layers_[i].loadWeights(prefix + "_layer" + std::to_string(i) + ".txt"))
+            return false;
+    }
+    return true;
+}
+
+}// namespace neural_network
