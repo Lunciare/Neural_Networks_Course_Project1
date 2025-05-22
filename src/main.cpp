@@ -34,7 +34,7 @@ int main() {
       {ActivationFunction::Type::ReLU, ActivationFunction::Type::Identity},
       opt);
 
-  // Временный ограничитель; TODO
+  // Временный ограничитель работы кода до 2000; TODO
 
   const size_t TRAIN_LIMIT = 2000; // 500 для сверхбыстрого теста
   if (train_images.size() > TRAIN_LIMIT) {
@@ -65,6 +65,8 @@ int main() {
     std::cout << std::endl;
     std::cout << "Epoch " << (epoch + 1)
               << ", MSE: " << (loss / train_images.size()) << std::endl;
+
+    // Медленная работа кода 60000
 
     // for (int epoch = 0; epoch < 1; ++epoch) {
     //   double loss = 0.0;

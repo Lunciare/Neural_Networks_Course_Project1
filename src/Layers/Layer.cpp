@@ -55,19 +55,19 @@ bool Layer::saveWeights(const std::string &filename) const {
   std::ofstream out(filename, std::ios::binary);
   if (!out)
     return false;
-  // Сохраняем размеры
+  // Save sizes
   Index rows = weights_.rows();
   Index cols = weights_.cols();
   out.write((char *)&rows, sizeof(rows));
   out.write((char *)&cols, sizeof(cols));
-  // Сохраняем веса (построчно)
+  // Save weights (by rows)
   for (Index i = 0; i < rows; ++i)
     out.write(reinterpret_cast<const char *>(weights_.data() + i * cols),
               sizeof(double) * cols);
-  // Сохраняем размер bias
+  // Save the size of bias
   Index bsize = biases_.size();
   out.write((char *)&bsize, sizeof(bsize));
-  // Сохраняем biases
+  // Save biases
   for (Index i = 0; i < bsize; ++i)
     out.write((char *)&biases_(i), sizeof(double));
   return (bool)out;
@@ -77,7 +77,7 @@ bool Layer::loadWeights(const std::string &filename) {
   std::ifstream in(filename, std::ios::binary);
   if (!in)
     return false;
-  // Читаем размеры
+  // Read sizes
   Index rows, cols;
   in.read((char *)&rows, sizeof(rows));
   in.read((char *)&cols, sizeof(cols));
@@ -85,7 +85,7 @@ bool Layer::loadWeights(const std::string &filename) {
   for (Index i = 0; i < rows; ++i)
     in.read(reinterpret_cast<char *>(weights_.data() + i * cols),
             sizeof(double) * cols);
-  // Читаем размер bias
+  // Read the size of bias
   Index bsize;
   in.read((char *)&bsize, sizeof(bsize));
   biases_.resize(bsize);
