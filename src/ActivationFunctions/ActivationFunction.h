@@ -1,5 +1,5 @@
 #pragma once
-#include "Utilities/LinAlg.h"
+#include "Utilities/Utils.h"
 
 namespace neural_network {
 

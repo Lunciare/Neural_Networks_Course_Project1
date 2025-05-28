@@ -2,7 +2,7 @@
 
 #include "ActivationFunctions/ActivationFunction.h"
 #include "Optimizer/Optimizer.h"
-#include "Utilities/LinAlg.h"
+#include "Utilities/Utils.h"
 
 #include <string>
 
