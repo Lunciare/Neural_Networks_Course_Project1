@@ -4,6 +4,3 @@
 [submodule "external/eigenRand"]
 	path = external/eigenRand
 	url = https://github.com/bab2min/EigenRand.git
-[submodule "external/folly"]
-	path = external/folly
-	url = https://github.com/facebook/folly.git
