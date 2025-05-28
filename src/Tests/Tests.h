@@ -1,12 +1,11 @@
 #pragma once
 
-namespace neural_network
-{
-namespace test
-{
+namespace neural_network {
+namespace test {
 
-// Returns true if all tests pass, false otherwise
-bool runAllTests();
+enum class TestStatus { Error, OK };
 
-}// namespace test
-}// namespace neural_network
+void runAllTests();
+
+} // namespace test
+} // namespace neural_network
