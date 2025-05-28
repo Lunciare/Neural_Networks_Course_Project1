@@ -3,8 +3,8 @@
 #include "Model/Model.h"
 #include "Optimizer/Optimizer.h"
 #include "Tests/Tests.h"
-#include "Utilities/LinAlg.h"
 #include "Utilities/Random.h"
+#include "Utilities/Utils.h"
 #include <iostream>
 
 using namespace neural_network;
@@ -36,7 +36,7 @@ int main() {
 
   // Временный ограничитель работы кода до 2000; TODO
 
-  const size_t TRAIN_LIMIT = 2000; // 500 для сверхбыстрого теста
+  constexpr size_t TRAIN_LIMIT = 2000; // 500 для сверхбыстрого теста
   if (train_images.size() > TRAIN_LIMIT) {
     train_images.resize(TRAIN_LIMIT);
     train_labels.resize(TRAIN_LIMIT);

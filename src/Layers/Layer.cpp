@@ -8,10 +8,8 @@
 namespace neural_network {
 
 Matrix Layer::initWeights(Index out, Index in) {
-  // Initialization: variance = 2/(fan_in + fan_out)
   double stddev = std::sqrt(2.0 / (in + out));
-  auto &rng = Random::global().engine();
-  return Eigen::Rand::normal<Matrix>(out, in, rng, 0.0, stddev);
+  return Random::global().normalMatrix(out, in, 0.0, stddev);
 }
 
 Vector Layer::initBiases(Index out) { return Vector::Zero(out); }
