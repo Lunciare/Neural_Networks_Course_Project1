@@ -3,7 +3,6 @@
 
 namespace neural_network {
 
-// Provides static methods for activation functions and their derivatives.
 class ActivationFunction {
 public:
   enum class Type { ReLU, Sigmoid, Identity, Tanh };

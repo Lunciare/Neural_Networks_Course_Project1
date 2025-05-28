@@ -4,7 +4,6 @@
 
 namespace neural_network {
 
-// Reads a 32-bit unsigned integer in big-endian from file
 static uint32_t readUint32BE(std::ifstream &in) {
   unsigned char bytes[4];
   in.read(reinterpret_cast<char *>(bytes), 4);

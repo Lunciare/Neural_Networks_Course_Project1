@@ -4,7 +4,6 @@
 
 namespace neural_network {
 
-// Neural network as a sequence of layers with shared optimizer
 class Model {
 public:
   Model(const std::vector<size_t> &layer_sizes,
@@ -13,7 +12,6 @@ public:
 
   Vector forward(const Vector &input);
 
-  // One training step: forward, backward and optimizer update
   void trainStep(const Vector &x, const Vector &y);
 
   bool save(const std::string &prefix) const;

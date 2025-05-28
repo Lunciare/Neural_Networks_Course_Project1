@@ -35,16 +35,15 @@ Vector Layer::forward(const Vector &input) {
 Vector Layer::backward(const Vector &grad_output) {
   assert(grad_output.size() == output_size_);
   ++t_;
-  // derivative of activation
+
   Vector activated = ActivationFunction::apply(activation_type_, last_z_);
   auto deriv = ActivationFunction::derivative(activation_type_, activated);
-  // element-wise multiply
+
   auto dz = grad_output.array() * deriv.array();
-  // gradients
+
   auto grad_w = dz.matrix() * last_input_.transpose();
   auto grad_b = dz.matrix();
 
-  // Adam update (in-place)
   optimizer_.update(weights_, m_w_, v_w_, grad_w, t_);
   optimizer_.update(biases_, m_b_, v_b_, grad_b, t_);
 
@@ -57,9 +56,7 @@ bool Layer::saveWeights(const std::string &filename) const {
   if (!out.is_open())
     return false;
 
-  // write dimensions
   out << weights_.rows() << ' ' << weights_.cols() << '\n';
-  // write weights row by row
   for (Index i = 0; i < weights_.rows(); ++i) {
     for (Index j = 0; j < weights_.cols(); ++j) {
       out << weights_(i, j) << ' ';
@@ -67,9 +64,7 @@ bool Layer::saveWeights(const std::string &filename) const {
     out << '\n';
   }
 
-  // write bias size
   out << biases_.size() << '\n';
-  // write biases
   for (Index i = 0; i < biases_.size(); ++i) {
     out << biases_(i) << ' ';
   }
