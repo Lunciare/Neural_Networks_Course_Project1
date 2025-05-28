@@ -13,9 +13,9 @@ public:
                         double eps = 1e-8);
 
   void update(Matrix &param, Matrix &m, Matrix &v, const Matrix &grad,
-              Index t) const;
+              Index iteration) const;
   void update(Vector &param, Vector &m, Vector &v, const Vector &grad,
-              Index t) const;
+              Index iteration) const;
 
 private:
   std::function<void(Matrix &, Matrix &, Matrix &, const Matrix &, Index)>

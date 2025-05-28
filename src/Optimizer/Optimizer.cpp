@@ -20,32 +20,32 @@ Optimizer Optimizer::SGD(double lr) {
 
 Optimizer Optimizer::Adam(double lr, double beta1, double beta2, double eps) {
   auto update_m = [=](Matrix &p, Matrix &m, Matrix &v, const Matrix &g,
-                      Index t) {
+                      Index iteration) {
     m = beta1 * m + (1.0 - beta1) * g;
     v = beta2 * v + (1.0 - beta2) * g.array().square().matrix();
-    Matrix m_hat = m / (1.0 - std::pow(beta1, t));
-    Matrix v_hat = v / (1.0 - std::pow(beta2, t));
+    Matrix m_hat = m / (1.0 - std::pow(beta1, iteration));
+    Matrix v_hat = v / (1.0 - std::pow(beta2, iteration));
     p -= lr * (m_hat.array() / (v_hat.array().sqrt() + eps)).matrix();
   };
   auto update_v = [=](Vector &p, Vector &m, Vector &v, const Vector &g,
-                      Index t) {
+                      Index iteration) {
     m = beta1 * m + (1.0 - beta1) * g;
     v = beta2 * v + (1.0 - beta2) * g.array().square().matrix();
-    Vector m_hat = m / (1.0 - std::pow(beta1, t));
-    Vector v_hat = v / (1.0 - std::pow(beta2, t));
+    Vector m_hat = m / (1.0 - std::pow(beta1, iteration));
+    Vector v_hat = v / (1.0 - std::pow(beta2, iteration));
     p -= lr * (m_hat.array() / (v_hat.array().sqrt() + eps)).matrix();
   };
   return Optimizer(update_m, update_v);
 }
 
 void Optimizer::update(Matrix &p, Matrix &m, Matrix &v, const Matrix &g,
-                       Index t) const {
-  update_matrix_(p, m, v, g, t);
+                       Index iteration) const {
+  update_matrix_(p, m, v, g, iteration);
 }
 
 void Optimizer::update(Vector &p, Vector &m, Vector &v, const Vector &g,
-                       Index t) const {
-  update_vector_(p, m, v, g, t);
+                       Index iteration) const {
+  update_vector_(p, m, v, g, iteration);
 }
 
 } // namespace neural_network
