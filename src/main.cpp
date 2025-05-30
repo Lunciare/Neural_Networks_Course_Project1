@@ -26,10 +26,8 @@ int main() {
 
   Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
 
-  Model model(
-      {784, 128, 10},
-      {ActivationFunction::Type::ReLU, ActivationFunction::Type::Identity},
-      opt);
+  Model model({784, 128, 10}, {ActivationFunction::Type::ReLU,
+                               ActivationFunction::Type::Identity});
 
   constexpr Index TRAIN_LIMIT = 2000;
   if (size(train_images) > TRAIN_LIMIT) {
@@ -37,16 +35,22 @@ int main() {
     train_labels.resize(TRAIN_LIMIT);
   }
 
+  // One-hot encode labels
+  std::vector<Vector> train_targets;
+  for (int label : train_labels) {
+    Vector y = Vector::Zero(10);
+    y[label] = 1.0;
+    train_targets.push_back(y);
+  }
+
   for (int epoch = 0; epoch < 1; ++epoch) {
     double loss = 0.0;
 
-    for (Index i = 0; i < size(train_images); ++i) {
-      Vector x = train_images[i];
-      Vector y = Vector::Zero(10);
-      y[train_labels[i]] = 1.0;
+    model.train(train_images, train_targets, 1, LossFunction{}, opt);
 
-      model.trainStep(x, y);
-      loss += LossFunction::mse(model.forward(x), y);
+    for (Index i = 0; i < size(train_images); ++i) {
+      loss +=
+          LossFunction::mse(model.forward(train_images[i]), train_targets[i]);
 
       if (i % 500 == 0 || i + 1 == size(train_images)) {
         int barWidth = 40;

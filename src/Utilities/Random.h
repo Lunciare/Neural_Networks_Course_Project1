@@ -15,8 +15,6 @@ public:
 
   static Random &global();
 
-  Eigen::Rand::Vmt19937_64 &engine() { return generator_; }
-
 private:
   static constexpr std::uint64_t k_default_seed_ = 42;
   Eigen::Rand::Vmt19937_64 generator_;
