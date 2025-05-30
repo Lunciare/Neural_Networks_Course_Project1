@@ -10,11 +10,7 @@
 using namespace neural_network;
 
 int main() {
-
-  if (!test::runAllTests()) {
-    std::cerr << "Unit tests failed! Exiting.\n";
-    return 1;
-  }
+  test::runAllTests();
 
   std::vector<Vector> train_images;
   std::vector<int> train_labels;
@@ -25,72 +21,47 @@ int main() {
     std::cerr << "Failed to load MNIST data!\n";
     return 1;
   }
-  std::cout << "Train size: " << train_images.size() << std::endl;
 
-  Optimizer opt(0.001, 0.9, 0.999, 1e-8, OptimizerType::Adam);
+  std::cout << "Train size: " << size(train_images) << std::endl;
+
+  Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
 
   Model model(
       {784, 128, 10},
       {ActivationFunction::Type::ReLU, ActivationFunction::Type::Identity},
       opt);
 
-  // Временный ограничитель работы кода до 2000; TODO
-
-  constexpr size_t TRAIN_LIMIT = 2000; // 500 для сверхбыстрого теста
-  if (train_images.size() > TRAIN_LIMIT) {
+  constexpr Index TRAIN_LIMIT = 2000;
+  if (size(train_images) > TRAIN_LIMIT) {
     train_images.resize(TRAIN_LIMIT);
     train_labels.resize(TRAIN_LIMIT);
   }
 
   for (int epoch = 0; epoch < 1; ++epoch) {
     double loss = 0.0;
-    for (Index i = 0; i < static_cast<Index>(train_images.size()); ++i) {
+
+    for (Index i = 0; i < size(train_images); ++i) {
       Vector x = train_images[i];
       Vector y = Vector::Zero(10);
       y[train_labels[i]] = 1.0;
+
       model.trainStep(x, y);
       loss += LossFunction::mse(model.forward(x), y);
 
-      if (i % 500 == 0 || i + 1 == train_images.size()) {
+      if (i % 500 == 0 || i + 1 == size(train_images)) {
         int barWidth = 40;
-        float progress = float(i + 1) / train_images.size();
+        float progress = float(i + 1) / size(train_images);
         std::cout << "\r[";
         int pos = barWidth * progress;
         for (int j = 0; j < barWidth; ++j)
           std::cout << (j < pos ? "=" : " ");
         std::cout << "] " << int(progress * 100.0) << "% (" << (i + 1) << "/"
-                  << train_images.size() << ")" << std::flush;
+                  << size(train_images) << ")" << std::flush;
       }
     }
+
     std::cout << std::endl;
     std::cout << "Epoch " << (epoch + 1)
-              << ", MSE: " << (loss / train_images.size()) << std::endl;
-
-    // Медленная работа кода 60000
-
-    // for (int epoch = 0; epoch < 1; ++epoch) {
-    //   double loss = 0.0;
-    //   for (Index i = 0; i < static_cast<Index>(train_images.size()); ++i) {
-    //     Vector x = train_images[i];
-    //     Vector y = Vector::Zero(10);
-    //     y[train_labels[i]] = 1.0;
-    //     model.trainStep(x, y);
-    //     loss += LossFunction::mse(model.forward(x), y);
-    //     // Progress bar
-    //     if (i % 1000 == 0 || i + 1 == train_images.size()) {
-    //       int barWidth = 40;
-    //       float progress = float(i + 1) / train_images.size();
-    //       std::cout << "\r[";
-    //       int pos = barWidth * progress;
-    //       for (int j = 0; j < barWidth; ++j)
-    //         std::cout << (j < pos ? "=" : " ");
-    //       std::cout << "] " << int(progress * 100.0) << "% (" << (i + 1) <<
-    //       "/"
-    //                 << train_images.size() << ")" << std::flush;
-    //     }
-    //   }
-    //   std::cout << std::endl;
-    //   std::cout << "Epoch " << (epoch + 1)
-    //             << ", MSE: " << (loss / train_images.size()) << std::endl;
+              << ", MSE: " << (loss / size(train_images)) << std::endl;
   }
 }

@@ -26,4 +26,8 @@ private:
   Index value_;
 };
 
+template <typename T> Index size(const std::vector<T> &vec) {
+  return static_cast<Index>(vec.size());
+}
+
 } // namespace neural_network
