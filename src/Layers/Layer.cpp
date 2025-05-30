@@ -7,14 +7,14 @@
 
 namespace neural_network {
 
-Matrix Layer::initWeights(Index out, Index in) {
+Matrix Layer::initWeights(Out out, In in) {
   double stddev = std::sqrt(2.0 / (in + out));
   return Random::global().normalMatrix(out, in, 0.0, stddev);
 }
 
-Vector Layer::initBiases(Index out) { return Vector::Zero(out); }
+Vector Layer::initBiases(Out out) { return Vector::Zero(out); }
 
-Layer::Layer(Index in, Index out, ActivationFunction activation)
+Layer::Layer(In in, Out out, ActivationFunction activation)
     : weights_(initWeights(out, in)), biases_(initBiases(out)),
       m_w_(Matrix::Zero(out, in)), v_w_(Matrix::Zero(out, in)),
       m_b_(Vector::Zero(out)), v_b_(Vector::Zero(out)), t_(0),
