@@ -21,7 +21,15 @@ Layer::Layer(In in, Out out, ActivationFunction activation)
       last_input_(Vector::Zero(in)), last_z_(Vector::Zero(out)),
       optimizer_(nullptr), activation_(std::move(activation)) {}
 
-Vector Layer::forward(const Vector &input) const {
+Vector Layer::forward(const Vector &input) {
+  assert(input.size() == weights_.cols());
+  last_input_ = input;
+  last_z_ = weights_ * input + biases_;
+  return activation_.apply(activation_type_, last_z_);
+}
+
+Vector Layer::predict(const Vector &input) const {
+  assert(input.size() == weights_.cols());
   Vector z = weights_ * input + biases_;
   return activation_.apply(activation_type_, z);
 }

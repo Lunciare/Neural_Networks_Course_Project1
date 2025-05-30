@@ -16,7 +16,7 @@ Model::Model(std::initializer_list<size_t> layer_sizes,
 Vector Model::forward(const Vector &input) const {
   Vector x = input;
   for (const auto &layer : layers_) {
-    x = layer.forward(x);
+    x = layer.predict(x);
   }
   return x;
 }
@@ -25,7 +25,7 @@ std::vector<Vector> Model::forwardTrain(const Vector &x) const {
   std::vector<Vector> activations;
   activations.push_back(x);
   for (const auto &layer : layers_) {
-    activations.push_back(layer.forward(activations.back()));
+    activations.push_back(layer.predict(activations.back()));
   }
   return activations;
 }

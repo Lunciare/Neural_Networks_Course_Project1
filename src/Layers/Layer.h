@@ -12,7 +12,8 @@ class Layer {
 public:
   Layer(In in, Out out, ActivationFunction activation);
 
-  Vector forward(const Vector &input) const;
+  Vector forward(const Vector &input);
+  Vector predict(const Vector &input) const;
   Vector forwardTrain(const Vector &input); // saves input/z
   Vector backward(const Vector &grad_output);
 
