@@ -14,33 +14,28 @@ Matrix Layer::initWeights(Index out, Index in) {
 
 Vector Layer::initBiases(Index out) { return Vector::Zero(out); }
 
-Layer::Layer(Index in, Index out, ActivationFunction::Type activation)
-    : input_size_(in), output_size_(out), activation_type_(activation),
-      weights_(initWeights(out, in)), biases_(initBiases(out)),
+Layer::Layer(Index in, Index out, ActivationFunction activation)
+    : weights_(initWeights(out, in)), biases_(initBiases(out)),
       m_w_(Matrix::Zero(out, in)), v_w_(Matrix::Zero(out, in)),
       m_b_(Vector::Zero(out)), v_b_(Vector::Zero(out)), t_(0),
       last_input_(Vector::Zero(in)), last_z_(Vector::Zero(out)),
-      optimizer_(nullptr) {}
+      optimizer_(nullptr), activation_(std::move(activation)) {}
 
 Vector Layer::forward(const Vector &input) const {
-  assert(input.size() == input_size_);
   Vector z = weights_ * input + biases_;
-  return ActivationFunction::apply(activation_type_, z);
+  return activation_.apply(activation_type_, z);
 }
 
 Vector Layer::forwardTrain(const Vector &input) {
-  assert(input.size() == input_size_);
   last_input_ = input;
   last_z_ = weights_ * input + biases_;
-  return ActivationFunction::apply(activation_type_, last_z_);
+  return activation_.apply(activation_type_, last_z_);
 }
 
 Vector Layer::backward(const Vector &grad_output) {
-  assert(grad_output.size() == output_size_);
   ++t_;
 
-  Vector activated = ActivationFunction::apply(activation_type_, last_z_);
-  Vector deriv = ActivationFunction::derivative(activation_type_, activated);
+  Vector deriv = activation_.derivative(activation_type_, last_z_);
   Vector dz = grad_output.array() * deriv.array();
 
   Matrix grad_w = dz * last_input_.transpose();
@@ -63,16 +58,14 @@ Layer::IOStatus Layer::saveWeights(const std::string &filename) const {
 
   out << weights_.rows() << ' ' << weights_.cols() << '\n';
   for (Index i = 0; i < weights_.rows(); ++i) {
-    for (Index j = 0; j < weights_.cols(); ++j) {
+    for (Index j = 0; j < weights_.cols(); ++j)
       out << weights_(i, j) << ' ';
-    }
     out << '\n';
   }
 
   out << biases_.size() << '\n';
-  for (Index i = 0; i < biases_.size(); ++i) {
+  for (Index i = 0; i < biases_.size(); ++i)
     out << biases_(i) << ' ';
-  }
   out << '\n';
 
   return out.good() ? IOStatus::OK : IOStatus::IOError;

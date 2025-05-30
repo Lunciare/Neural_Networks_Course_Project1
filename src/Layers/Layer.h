@@ -10,7 +10,7 @@ namespace neural_network {
 
 class Layer {
 public:
-  Layer(Index in, Index out, ActivationFunction::Type activation);
+  Layer(Index in, Index out, ActivationFunction activation);
 
   Vector forward(const Vector &input) const;
   Vector forwardTrain(const Vector &input); // saves input/z
@@ -26,9 +26,8 @@ private:
   static Matrix initWeights(Index out, Index in);
   static Vector initBiases(Index out);
 
-  Index input_size_;
-  Index output_size_;
   ActivationFunction::Type activation_type_;
+  ActivationFunction activation_;
 
   Matrix weights_;
   Vector biases_;
