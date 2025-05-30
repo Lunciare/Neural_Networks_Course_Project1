@@ -1,54 +1,61 @@
 #include "Model/Model.h"
-#include "LossFunctions/LossFunction.h"
 #include <cassert>
 
 namespace neural_network {
 
-Model::Model(const std::vector<size_t> &layer_sizes,
-             const std::vector<ActivationFunction::Type> &activations,
-             const Optimizer &optimizer) {
+Model::Model(std::initializer_list<size_t> layer_sizes,
+             std::initializer_list<ActivationFunction::Type> activations) {
   assert(layer_sizes.size() == activations.size() + 1);
-  for (size_t i = 1; i < layer_sizes.size(); ++i) {
-    layers_.emplace_back(In(layer_sizes[i - 1]), Out(layer_sizes[i]),
-                         activations[i - 1], optimizer);
+
+  auto it = activations.begin();
+  for (auto i = layer_sizes.begin(); i + 1 != layer_sizes.end(); ++i, ++it) {
+    layers_.emplace_back(In(*i), Out(*(i + 1)), *it);
   }
 }
 
-Vector Model::forward(const Vector &input) {
+Vector Model::forward(const Vector &input) const {
   Vector x = input;
-  for (auto &layer : layers_) {
+  for (const auto &layer : layers_) {
     x = layer.forward(x);
   }
   return x;
 }
 
-void Model::trainStep(const Vector &x, const Vector &y) {
-  std::vector<Vector> activations{x};
-  for (auto &layer : layers_)
+std::vector<Vector> Model::forwardTrain(const Vector &x) const {
+  std::vector<Vector> activations;
+  activations.push_back(x);
+  for (const auto &layer : layers_) {
     activations.push_back(layer.forward(activations.back()));
+  }
+  return activations;
+}
 
+void Model::backward(const std::vector<Vector> &activations,
+                     const Vector &grad) {
+  Vector g = grad;
+  for (int i = static_cast<int>(layers_.size()) - 1; i >= 0; --i) {
+    g = layers_[i].backward(g);
+  }
+}
+
+void Model::trainStep(const Vector &x, const Vector &y, LossFunction loss,
+                      Optimizer &optimizer) {
+  auto activations = forwardTrain(x);
   Vector grad = LossFunction::mseGrad(activations.back(), y);
-
-  // Backward pass
-  for (int i = int(layers_.size()) - 1; i >= 0; --i) {
-    grad = layers_[i].backward(grad);
+  for (auto &layer : layers_) {
+    layer.setOptimizer(&optimizer);
   }
+  backward(activations, grad);
 }
 
-bool Model::save(const std::string &prefix) const {
-  for (size_t i = 0; i < layers_.size(); ++i) {
-    if (!layers_[i].saveWeights(prefix + "_layer" + std::to_string(i) + ".txt"))
-      return false;
+void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
+                  int epochs, LossFunction loss, Optimizer &optimizer) {
+  assert(xs.size() == ys.size());
+  for (int e = 0; e < epochs; ++e) {
+    for (size_t i = 0; i < xs.size(); ++i) {
+      trainStep(xs[i], ys[i], loss, optimizer);
+    }
   }
-  return true;
-}
-
-bool Model::load(const std::string &prefix) {
-  for (size_t i = 0; i < layers_.size(); ++i) {
-    if (!layers_[i].loadWeights(prefix + "_layer" + std::to_string(i) + ".txt"))
-      return false;
-  }
-  return true;
 }
 
 } // namespace neural_network

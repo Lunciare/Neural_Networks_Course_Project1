@@ -10,20 +10,20 @@ namespace neural_network {
 
 class Layer {
 public:
-  Layer(Index in, Index out, ActivationFunction::Type activation,
-        const Optimizer &optimizer);
+  Layer(Index in, Index out, ActivationFunction::Type activation);
 
-  Vector forward(const Vector &input);
-
+  Vector forward(const Vector &input) const;
+  Vector forwardTrain(const Vector &input); // saves input/z
   Vector backward(const Vector &grad_output);
 
-  bool saveWeights(const std::string &filename) const;
+  void setOptimizer(Optimizer *optimizer);
 
-  bool loadWeights(const std::string &filename);
+  enum class IOStatus { OK, IOError };
+  IOStatus saveWeights(const std::string &filename) const;
+  IOStatus loadWeights(const std::string &filename);
 
 private:
   static Matrix initWeights(Index out, Index in);
-
   static Vector initBiases(Index out);
 
   Index input_size_;
@@ -44,7 +44,7 @@ private:
   Vector last_input_;
   Vector last_z_;
 
-  Optimizer optimizer_;
+  Optimizer *optimizer_;
 };
 
 } // namespace neural_network
