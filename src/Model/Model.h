@@ -17,7 +17,7 @@ public:
   void train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
              int epochs, LossFunction loss, Optimizer &optimizer);
 
-  const std::vector<Layer> &layers() const { return layers_; }
+  const std::vector<Layer> &layers() const;
 
 private:
   std::vector<Layer> layers_;

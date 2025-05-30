@@ -58,4 +58,6 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
   }
 }
 
+const std::vector<Layer> &Model::layers() const { return layers_; }
+
 } // namespace neural_network
