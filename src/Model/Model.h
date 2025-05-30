@@ -23,10 +23,12 @@ private:
   std::vector<Layer> layers_;
 
   std::vector<Vector> forwardTrain(const Vector &x) const;
-  void backward(const std::vector<Vector> &activations, const Vector &grad);
+  void backward(const Vector &grad);
 
-  void trainStep(const Vector &x, const Vector &y, LossFunction loss,
-                 Optimizer &optimizer);
+  void trainStep(
+      const Vector &x, const Vector &y,
+      const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
+      Optimizer &optimizer);
 };
 
 } // namespace neural_network

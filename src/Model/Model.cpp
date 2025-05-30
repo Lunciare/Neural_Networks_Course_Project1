@@ -30,22 +30,24 @@ std::vector<Vector> Model::forwardTrain(const Vector &x) const {
   return activations;
 }
 
-void Model::backward(const std::vector<Vector> &activations,
-                     const Vector &grad) {
+void Model::backward(const Vector &grad) {
   Vector g = grad;
-  for (int i = static_cast<int>(layers_.size()) - 1; i >= 0; --i) {
+  for (int i = layers_.size() - 1; i >= 0; --i) {
     g = layers_[i].backward(g);
   }
 }
 
-void Model::trainStep(const Vector &x, const Vector &y, LossFunction loss,
-                      Optimizer &optimizer) {
+void Model::trainStep(
+    const Vector &x, const Vector &y,
+    const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
+    Optimizer &optimizer) {
   auto activations = forwardTrain(x);
-  Vector grad = LossFunction::mseGrad(activations.back(), y);
-  for (auto &layer : layers_) {
+  Vector grad = lossGrad(activations.back(), y);
+
+  for (auto &layer : layers_)
     layer.setOptimizer(&optimizer);
-  }
-  backward(activations, grad);
+
+  backward(grad);
 }
 
 void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
@@ -53,7 +55,7 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
   assert(xs.size() == ys.size());
   for (int e = 0; e < epochs; ++e) {
     for (size_t i = 0; i < xs.size(); ++i) {
-      trainStep(xs[i], ys[i], loss, optimizer);
+      trainStep(xs[i], ys[i], LossFunction::mseGrad, optimizer);
     }
   }
 }
