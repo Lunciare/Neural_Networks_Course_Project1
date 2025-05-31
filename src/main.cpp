@@ -27,7 +27,7 @@ int main() {
 
   Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
   Model model({784, 128, 10}, {ActivationFunction::Type::ReLU,
-                               ActivationFunction::Type::Identity});
+                               ActivationFunction::Type::Softmax});
 
   std::vector<Vector> train_targets;
   train_targets.reserve(train_labels.size());

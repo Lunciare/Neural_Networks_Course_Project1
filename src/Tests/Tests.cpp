@@ -35,6 +35,14 @@ TestStatus testActivationFunction() {
     return TestStatus::Error;
   }
 
+  Vector y_softmax = AF::create(AF::Type::Softmax).apply(x);
+  Vector exp_x = x.array().exp();
+  Vector expected_softmax = exp_x / exp_x.sum();
+  if ((y_softmax - expected_softmax).array().abs().maxCoeff() > 1e-8) {
+    std::cout << "[FAIL] ActivationFunction::Softmax value incorrect\n";
+    return TestStatus::Error;
+  }
+
   return TestStatus::OK;
 }
 
@@ -57,7 +65,6 @@ TestStatus testOptimizerAdam() {
   Matrix w = Matrix::Ones(1, 1);
   Matrix grad = Matrix::Ones(1, 1);
 
-  // Инициализируем кэш
   std::any cache = opt.init_cache(w.rows(), w.cols());
 
   try {
