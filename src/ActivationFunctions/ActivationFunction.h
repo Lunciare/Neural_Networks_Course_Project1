@@ -20,7 +20,6 @@ public:
   static ActivationFunction Sigmoid();
   static ActivationFunction Identity();
   static ActivationFunction Tanh();
-  static ActivationFunction Softmax();
 
   static ActivationFunction create(Type type);
 

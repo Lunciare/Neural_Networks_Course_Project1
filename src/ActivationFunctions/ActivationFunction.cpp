@@ -1,6 +1,7 @@
 #include "ActivationFunctions/ActivationFunction.h"
 #include <cassert>
 #include <cmath>
+#include <stdexcept>
 
 namespace neural_network {
 
@@ -48,16 +49,6 @@ ActivationFunction ActivationFunction::Tanh() {
       });
 }
 
-ActivationFunction ActivationFunction::Softmax() {
-  return ActivationFunction(
-      [](const Vector &x) {
-        Vector shifted = x.array() - x.maxCoeff();
-        Vector exp = shifted.array().exp();
-        return exp / exp.sum();
-      },
-      [](const Vector &x) { return Vector::Ones(x.size()); });
-}
-
 ActivationFunction ActivationFunction::create(Type type) {
   switch (type) {
   case Type::ReLU:
@@ -68,8 +59,6 @@ ActivationFunction ActivationFunction::create(Type type) {
     return Identity();
   case Type::Tanh:
     return Tanh();
-  case Type::Softmax:
-    return Softmax();
   default:
     assert(false && "Unknown ActivationFunction::Type");
     return ReLU(); // fallback
