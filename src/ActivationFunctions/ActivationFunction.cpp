@@ -4,35 +4,63 @@
 
 namespace neural_network {
 
-Vector ActivationFunction::apply(Type type, const Vector &x) {
-  switch (type) {
-  case Type::ReLU:
-    return x.array().max(0.0).matrix();
-  case Type::Sigmoid:
-    return (1.0 / (1.0 + (-x.array()).exp())).matrix();
-  case Type::Identity:
-    return x;
-  case Type::Tanh:
-    return x.array().tanh().matrix();
-  default:
-    assert(false && "Unknown activation type");
-    return x;
-  }
+using Type = ActivationFunction::Type;
+
+ActivationFunction::ActivationFunction(Function f_apply, Function f_derivative)
+    : f_apply_(std::move(f_apply)), f_derivative_(std::move(f_derivative)) {}
+
+Vector ActivationFunction::apply(const Vector &x) const { return f_apply_(x); }
+
+Vector ActivationFunction::derivative(const Vector &x) const {
+  return f_derivative_(x);
 }
 
-Vector ActivationFunction::derivative(Type type, const Vector &y) {
+ActivationFunction ActivationFunction::ReLU() {
+  return ActivationFunction(
+      [](const Vector &x) { return x.array().max(0.0).matrix(); },
+      [](const Vector &x) {
+        return (x.array() > 0.0).cast<double>().matrix();
+      });
+}
+
+ActivationFunction ActivationFunction::Sigmoid() {
+  return ActivationFunction(
+      [](const Vector &x) {
+        return (1.0 / (1.0 + (-x.array()).exp())).matrix();
+      },
+      [](const Vector &x) {
+        Vector sig = (1.0 / (1.0 + (-x.array()).exp())).matrix();
+        return (sig.array() * (1.0 - sig.array())).matrix();
+      });
+}
+
+ActivationFunction ActivationFunction::Identity() {
+  return ActivationFunction(
+      [](const Vector &x) { return x; },
+      [](const Vector &x) { return Vector::Ones(x.size()); });
+}
+
+ActivationFunction ActivationFunction::Tanh() {
+  return ActivationFunction(
+      [](const Vector &x) { return x.array().tanh().matrix(); },
+      [](const Vector &x) {
+        return (1.0 - x.array().tanh().square()).matrix();
+      });
+}
+
+ActivationFunction ActivationFunction::create(Type type) {
   switch (type) {
   case Type::ReLU:
-    return (y.array() > 0.0).cast<double>().matrix();
+    return ReLU();
   case Type::Sigmoid:
-    return (y.array() * (1.0 - y.array())).matrix();
+    return Sigmoid();
   case Type::Identity:
-    return Vector::Ones(y.size());
+    return Identity();
   case Type::Tanh:
-    return (1.0 - y.array().square()).matrix();
+    return Tanh();
   default:
-    assert(false && "Unknown activation type");
-    return y;
+    assert(false && "Unknown ActivationFunction::Type");
+    return ReLU(); // fallback
   }
 }
 
