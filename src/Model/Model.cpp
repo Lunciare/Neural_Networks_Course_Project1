@@ -26,16 +26,22 @@ Vector Model::forward(const Vector &input) const {
 
 std::vector<Vector> Model::forwardTrain(const Vector &x) const {
   std::vector<Vector> activations;
-  activations.push_back(x);
+  activations.reserve(layers_.size() + 1);
+
+  Vector current = x;
+  activations.push_back(current);
+
   for (const auto &layer : layers_) {
-    activations.push_back(layer.predict(activations.back()));
+    current = layer.predict(current);
+    activations.push_back(current);
   }
+
   return activations;
 }
 
 void Model::backward(const Vector &grad, const Optimizer &opt) {
   Vector g = grad;
-  for (int i = layers_.size() - 1; i >= 0; --i) {
+  for (int i = static_cast<int>(layers_.size()) - 1; i >= 0; --i) {
     g = layers_[i].backward(g, opt);
   }
 }
@@ -44,10 +50,18 @@ void Model::trainStep(
     const Vector &x, const Vector &y,
     const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
     Optimizer &optimizer) {
+  for (auto &layer : layers_) {
+    layer.set_cache(optimizer);
+  }
+
   auto activations = forwardTrain(x);
   Vector grad = lossGrad(activations.back(), y);
 
   backward(grad, optimizer);
+
+  for (auto &layer : layers_) {
+    layer.free_cache();
+  }
 }
 
 void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
@@ -61,13 +75,5 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
 }
 
 const std::vector<Layer> &Model::layers() const { return layers_; }
-
-template <class Reader> void Model::read(Reader &in) { in >> layers_; }
-
-template <class Writer> void Model::write(Writer &out) const { out << layers_; }
-
-// Explicit template instantiations
-template void Model::read(FileReader &);
-template void Model::write(FileWriter &) const;
 
 } // namespace neural_network

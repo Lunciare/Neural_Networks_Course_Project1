@@ -15,25 +15,22 @@ public:
 
   Vector forward(const Vector &input) const;
 
+  void trainStep(
+      const Vector &x, const Vector &y,
+      const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
+      Optimizer &optimizer);
+
   void train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
              int epochs, LossFunction loss, Optimizer &optimizer);
 
   const std::vector<Layer> &layers() const;
 
-  template <class Reader> void read(Reader &in);
-
-  template <class Writer> void write(Writer &out) const;
-
 private:
   std::vector<Layer> layers_;
 
   std::vector<Vector> forwardTrain(const Vector &x) const;
-  void backward(const Vector &grad, const Optimizer &opt);
 
-  void trainStep(
-      const Vector &x, const Vector &y,
-      const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
-      Optimizer &optimizer);
+  void backward(const Vector &grad, const Optimizer &opt);
 };
 
 } // namespace neural_network

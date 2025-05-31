@@ -35,7 +35,6 @@ int main() {
     train_labels.resize(TRAIN_LIMIT);
   }
 
-  // One-hot encode labels
   std::vector<Vector> train_targets;
   for (int label : train_labels) {
     Vector y = Vector::Zero(10);

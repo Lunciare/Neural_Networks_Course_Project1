@@ -33,7 +33,7 @@ FileWriter &operator<<(FileWriter &w, const Matrix &m) {
 }
 
 FileWriter &operator<<(FileWriter &w, const Layer &layer) {
-  layer.write(w); // вызывает Layer::write<FileWriter>
+  layer.write(w);
   return w;
 }
 

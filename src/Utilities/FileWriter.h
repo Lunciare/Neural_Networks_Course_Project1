@@ -13,7 +13,6 @@ public:
   std::ofstream out_;
 };
 
-// Специализации
 FileWriter &operator<<(FileWriter &w, const Vector &v);
 FileWriter &operator<<(FileWriter &w, const Matrix &m);
 FileWriter &operator<<(FileWriter &w, const class Layer &layer);

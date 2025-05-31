@@ -9,7 +9,6 @@ FileReader::FileReader(const std::string &filename) : in_(filename) {
   }
 }
 
-// Перегрузки для базовых типов
 FileReader &operator>>(FileReader &r, int &value) {
   r.in_ >> value;
   return r;
@@ -30,7 +29,6 @@ FileReader &operator>>(FileReader &r, double &value) {
   return r;
 }
 
-// Перегрузка для Eigen-вектора
 FileReader &operator>>(FileReader &r, Vector &v) {
   size_t size;
   r >> size;
@@ -40,7 +38,6 @@ FileReader &operator>>(FileReader &r, Vector &v) {
   return r;
 }
 
-// Перегрузка для Eigen-матрицы
 FileReader &operator>>(FileReader &r, Matrix &m) {
   Index rows, cols;
   r >> rows >> cols;
@@ -51,7 +48,6 @@ FileReader &operator>>(FileReader &r, Matrix &m) {
   return r;
 }
 
-// Перегрузка для вектора слоёв
 FileReader &operator>>(FileReader &r, std::vector<Layer> &v) {
   size_t size;
   r >> size;

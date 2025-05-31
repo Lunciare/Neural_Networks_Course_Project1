@@ -20,11 +20,10 @@ Optimizer::Optimizer(MatrixUpdate mu, VectorUpdate vu, CacheInit ci)
       init_cache_(std::move(ci)) {}
 
 Optimizer Optimizer::SGD(double lr) {
-  return Optimizer([lr](Matrix &param, std::any &,
+  return Optimizer([lr](Matrix &param, std::any & /*cache_unused*/,
                         const Matrix &grad) { param -= lr * grad; },
-                   [lr](Vector &param, std::any &, const Vector &grad) {
-                     param -= lr * grad;
-                   },
+                   [lr](Vector &param, std::any & /*cache_unused*/,
+                        const Vector &grad) { param -= lr * grad; },
                    [](int, int) { return std::make_any<SGDCache>(); });
 }
 
@@ -39,9 +38,11 @@ Optimizer Optimizer::Adam(double lr, double beta1, double beta2, double eps) {
         ++cache->t;
 
         m = beta1 * m + (1.0 - beta1) * grad;
+
         v = beta2 * v + (1.0 - beta2) * grad.array().square().matrix();
 
-        Matrix m_hat = m / (1.0 - std::pow(beta1, cache->t));
+        Matrix m_hat = m;
+
         Matrix v_hat = v / (1.0 - std::pow(beta2, cache->t));
 
         param -= lr * (m_hat.array() / (v_hat.array().sqrt() + eps)).matrix();
@@ -55,9 +56,11 @@ Optimizer Optimizer::Adam(double lr, double beta1, double beta2, double eps) {
         ++cache->t;
 
         m = beta1 * m + (1.0 - beta1) * grad;
+
         v = beta2 * v + (1.0 - beta2) * grad.array().square().matrix();
 
-        Vector m_hat = m / (1.0 - std::pow(beta1, cache->t));
+        Vector m_hat = m;
+
         Vector v_hat = v / (1.0 - std::pow(beta2, cache->t));
 
         param -= lr * (m_hat.array() / (v_hat.array().sqrt() + eps)).matrix();
