@@ -1,52 +1,64 @@
 #include "Utilities/FileReader.h"
-#include "Layers/Layer.h"
 #include <stdexcept>
 
 namespace neural_network {
 
-FileReader::FileReader(const std::filesystem::path &path) : in_(path) {
+FileReader::FileReader(const std::string &filename) : in_(filename) {
   if (!in_) {
-    throw std::runtime_error("Failed to open file for reading");
+    throw std::runtime_error("Failed to open file: " + filename);
   }
 }
 
-template <typename T> FileReader &operator>>(FileReader &r, T &value) {
-  value.read(r);
+// Перегрузки для базовых типов
+FileReader &operator>>(FileReader &r, int &value) {
+  r.in_ >> value;
   return r;
 }
 
+FileReader &operator>>(FileReader &r, size_t &value) {
+  r.in_ >> value;
+  return r;
+}
+
+FileReader &operator>>(FileReader &r, long &value) {
+  r.in_ >> value;
+  return r;
+}
+
+FileReader &operator>>(FileReader &r, double &value) {
+  r.in_ >> value;
+  return r;
+}
+
+// Перегрузка для Eigen-вектора
 FileReader &operator>>(FileReader &r, Vector &v) {
-  Index size;
+  size_t size;
   r >> size;
   v.resize(size);
-  for (Index i = 0; i < size; ++i)
-    r >> v(i);
+  for (Index i = 0; i < v.size(); ++i)
+    r.in_ >> v(i);
   return r;
 }
 
+// Перегрузка для Eigen-матрицы
 FileReader &operator>>(FileReader &r, Matrix &m) {
   Index rows, cols;
   r >> rows >> cols;
   m.resize(rows, cols);
   for (Index i = 0; i < rows; ++i)
     for (Index j = 0; j < cols; ++j)
-      r >> m(i, j);
+      r.in_ >> m(i, j);
   return r;
 }
 
-template <> FileReader &operator>>(FileReader &r, std::vector<Layer> &v) {
-  Index size;
+// Перегрузка для вектора слоёв
+FileReader &operator>>(FileReader &r, std::vector<Layer> &v) {
+  size_t size;
   r >> size;
   v.resize(size);
-  for (auto &e : v)
-    e.read(r);
+  for (auto &layer : v)
+    layer.read(r);
   return r;
 }
-
-// Explicit instantiations
-template FileReader &operator>>(FileReader &, int &);
-template FileReader &operator>>(FileReader &, size_t &);
-template FileReader &operator>>(FileReader &, double &);
-template FileReader &operator>>(FileReader &, std::vector<Layer> &);
 
 } // namespace neural_network

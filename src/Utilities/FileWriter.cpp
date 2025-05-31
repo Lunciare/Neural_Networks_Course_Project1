@@ -45,6 +45,14 @@ FileWriter &operator<<(FileWriter &w, const std::vector<T> &v) {
   return w;
 }
 
+FileWriter &operator<<(FileWriter &w, const std::vector<Layer> &v) {
+  w << static_cast<Index>(v.size());
+  for (const auto &layer : v) {
+    layer.write(w);
+  }
+  return w;
+}
+
 // explicit instantiations
 template FileWriter &FileWriter::operator<<(const int &);
 template FileWriter &FileWriter::operator<<(const double &);

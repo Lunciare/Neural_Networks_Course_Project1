@@ -9,17 +9,22 @@
 
 namespace neural_network {
 
+Layer::Layer(In in, Out out, ActivationFunction activation)
+    : weights_(initWeights(out, in)), biases_(initBiases(out)),
+      last_input_(Vector::Zero(in)), last_z_(Vector::Zero(out)),
+      activation_(std::move(activation)) {}
+
+Layer::Layer()
+    : weights_(), biases_(), last_input_(), last_z_(), cache_(),
+      activation_(
+          ActivationFunction::create(ActivationFunction::Type::Identity)) {}
+
 Matrix Layer::initWeights(Out out, In in) {
   double stddev = std::sqrt(2.0 / (in + out));
   return Random::global().normalMatrix(out, in, 0.0, stddev);
 }
 
 Vector Layer::initBiases(Out out) { return Vector::Zero(out); }
-
-Layer::Layer(In in, Out out, ActivationFunction activation)
-    : weights_(initWeights(out, in)), biases_(initBiases(out)),
-      last_input_(Vector::Zero(in)), last_z_(Vector::Zero(out)),
-      activation_(std::move(activation)) {}
 
 Vector Layer::forward(const Vector &input) {
   assert(input.size() == weights_.cols());

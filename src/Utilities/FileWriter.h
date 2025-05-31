@@ -16,9 +16,10 @@ public:
 // Специализации
 FileWriter &operator<<(FileWriter &w, const Vector &v);
 FileWriter &operator<<(FileWriter &w, const Matrix &m);
-FileWriter &operator<<(FileWriter &w,
-                       const class Layer &layer); // 👈 добавь это
+FileWriter &operator<<(FileWriter &w, const class Layer &layer);
 template <typename T>
 FileWriter &operator<<(FileWriter &w, const std::vector<T> &v);
+
+FileWriter &operator<<(FileWriter &w, const std::vector<Layer> &v);
 
 } // namespace neural_network
