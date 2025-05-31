@@ -1,4 +1,6 @@
 #include "Model/Model.h"
+#include "Utilities/FileReader.h"
+#include "Utilities/FileWriter.h"
 #include <cassert>
 
 namespace neural_network {
@@ -61,5 +63,13 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
 }
 
 const std::vector<Layer> &Model::layers() const { return layers_; }
+
+template <class Reader> void Model::read(Reader &in) { in >> layers_; }
+
+template <class Writer> void Model::write(Writer &out) const { out << layers_; }
+
+// Explicit template instantiations
+template void Model::read(FileReader &);
+template void Model::write(FileWriter &) const;
 
 } // namespace neural_network

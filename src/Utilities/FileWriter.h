@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -6,20 +7,15 @@ namespace neural_network {
 
 class FileWriter {
 public:
-  explicit FileWriter(const std::string &filename);
-  ~FileWriter();
+  explicit FileWriter(const std::filesystem::path &file);
 
-  template <typename T> FileWriter &operator<<(const T &data);
-
-  bool good() const;
+  template <class T> FileWriter &operator<<(const T &x);
 
 private:
   std::ofstream file_;
 };
 
-template <typename T> FileWriter &FileWriter::operator<<(const T &data) {
-  file_ << data << ' ';
-  return *this;
-}
+template <class T, class A>
+FileWriter &operator<<(FileWriter &w, const std::vector<T, A> &vec);
 
 } // namespace neural_network

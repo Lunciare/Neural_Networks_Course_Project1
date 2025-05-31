@@ -18,6 +18,8 @@ set(SOURCES
     src/Model/Model.cpp
     src/Tests/Tests.cpp
     src/utilities/Random.cpp
+    src/Utilities/FileWriter.cpp
+    src/Utilities/FileReader.cpp
 )
 
 add_executable(neural_net ${SOURCES})

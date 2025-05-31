@@ -1,4 +1,6 @@
 #include "Layers/Layer.h"
+#include "Utilities/FileReader.h"
+#include "Utilities/FileWriter.h"
 #include "Utilities/Random.h"
 
 #include <cassert>
@@ -59,45 +61,34 @@ Vector Layer::backward(const Vector &grad_output) {
 
 void Layer::setOptimizer(Optimizer *optimizer) { optimizer_ = optimizer; }
 
-Layer::IOStatus Layer::saveWeights(const std::string &filename) const {
-  std::ofstream out(filename);
-  if (!out.is_open())
-    return IOStatus::IOError;
+template <class Reader> void Layer::read(Reader &in) {
+  int activation_int;
+  in >> activation_int;
+  activation_type_ = static_cast<ActivationFunction::Type>(activation_int);
+  activation_ = ActivationFunction(); // simple re-init, no params
 
-  out << weights_.rows() << ' ' << weights_.cols() << '\n';
-  for (Index i = 0; i < weights_.rows(); ++i) {
-    for (Index j = 0; j < weights_.cols(); ++j)
-      out << weights_(i, j) << ' ';
-    out << '\n';
-  }
+  in >> weights_;
+  in >> biases_;
 
-  out << biases_.size() << '\n';
-  for (Index i = 0; i < biases_.size(); ++i)
-    out << biases_(i) << ' ';
-  out << '\n';
+  // reset moments and time step
+  m_w_ = Matrix::Zero(weights_.rows(), weights_.cols());
+  v_w_ = Matrix::Zero(weights_.rows(), weights_.cols());
+  m_b_ = Vector::Zero(biases_.size());
+  v_b_ = Vector::Zero(biases_.size());
+  t_ = 0;
 
-  return out.good() ? IOStatus::OK : IOStatus::IOError;
+  last_input_ = Vector::Zero(weights_.cols());
+  last_z_ = Vector::Zero(weights_.rows());
 }
 
-Layer::IOStatus Layer::loadWeights(const std::string &filename) {
-  std::ifstream in(filename);
-  if (!in.is_open())
-    return IOStatus::IOError;
-
-  Index rows, cols;
-  in >> rows >> cols;
-  weights_.resize(rows, cols);
-  for (Index i = 0; i < rows; ++i)
-    for (Index j = 0; j < cols; ++j)
-      in >> weights_(i, j);
-
-  Index bsize;
-  in >> bsize;
-  biases_.resize(bsize);
-  for (Index i = 0; i < bsize; ++i)
-    in >> biases_(i);
-
-  return in.good() ? IOStatus::OK : IOStatus::IOError;
+template <class Writer> void Layer::write(Writer &out) const {
+  out << static_cast<int>(activation_type_);
+  out << weights_;
+  out << biases_;
 }
+
+// Explicit instantiations
+template void Layer::read(FileReader &);
+template void Layer::write(FileWriter &) const;
 
 } // namespace neural_network

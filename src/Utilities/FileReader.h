@@ -6,20 +6,15 @@ namespace neural_network {
 
 class FileReader {
 public:
-  explicit FileReader(const std::string &filename);
-  ~FileReader();
+  explicit FileReader(const std::filesystem::path &file);
 
-  template <typename T> FileReader &operator>>(T &data);
-
-  bool good() const;
+  template <class T> FileReader &operator>>(T &x);
 
 private:
   std::ifstream file_;
 };
 
-template <typename T> FileReader &FileReader::operator>>(T &data) {
-  file_ >> data;
-  return *this;
-}
+template <class T, class A>
+FileReader &operator>>(FileReader &r, std::vector<T, A> &vec);
 
 } // namespace neural_network

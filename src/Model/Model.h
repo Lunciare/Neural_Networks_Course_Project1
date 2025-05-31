@@ -2,6 +2,7 @@
 
 #include "Layers/Layer.h"
 #include "LossFunctions/LossFunction.h"
+#include <functional>
 #include <initializer_list>
 #include <vector>
 
@@ -18,6 +19,10 @@ public:
              int epochs, LossFunction loss, Optimizer &optimizer);
 
   const std::vector<Layer> &layers() const;
+
+  template <class Reader> void read(Reader &in);
+
+  template <class Writer> void write(Writer &out) const;
 
 private:
   std::vector<Layer> layers_;

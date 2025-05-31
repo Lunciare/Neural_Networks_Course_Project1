@@ -5,6 +5,7 @@
 #include "Utilities/Utils.h"
 
 #include <string>
+#include <vector>
 
 namespace neural_network {
 
@@ -19,9 +20,9 @@ public:
 
   void setOptimizer(Optimizer *optimizer);
 
-  enum class IOStatus { OK, IOError };
-  IOStatus saveWeights(const std::string &filename) const;
-  IOStatus loadWeights(const std::string &filename);
+  template <class Reader> void read(Reader &in);
+
+  template <class Writer> void write(Writer &out) const;
 
 private:
   static Matrix initWeights(Out out, In in);
