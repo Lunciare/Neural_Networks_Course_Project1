@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Utilities/Utils.h"
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -6,15 +9,18 @@ namespace neural_network {
 
 class FileReader {
 public:
-  explicit FileReader(const std::filesystem::path &file);
+  explicit FileReader(const std::filesystem::path &path);
 
-  template <class T> FileReader &operator>>(T &x);
+  template <typename T> friend FileReader &operator>>(FileReader &r, T &value);
+
+  friend FileReader &operator>>(FileReader &r, Vector &v);
+  friend FileReader &operator>>(FileReader &r, Matrix &m);
+
+  template <typename T>
+  friend FileReader &operator>>(FileReader &r, std::vector<T> &v);
 
 private:
-  std::ifstream file_;
+  std::ifstream in_;
 };
-
-template <class T, class A>
-FileReader &operator>>(FileReader &r, std::vector<T, A> &vec);
 
 } // namespace neural_network

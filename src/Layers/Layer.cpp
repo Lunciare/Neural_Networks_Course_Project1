@@ -25,19 +25,19 @@ Vector Layer::forward(const Vector &input) {
   assert(input.size() == weights_.cols());
   last_input_ = input;
   last_z_ = weights_ * input + biases_;
-  return activation_.apply(activation_type_, last_z_);
+  return activation_.apply(last_z_);
 }
 
 Vector Layer::predict(const Vector &input) const {
   assert(input.size() == weights_.cols());
   Vector z = weights_ * input + biases_;
-  return activation_.apply(activation_type_, z);
+  return activation_.apply(z);
 }
 
 Vector Layer::forwardTrain(const Vector &input) {
   last_input_ = input;
   last_z_ = weights_ * input + biases_;
-  return activation_.apply(activation_type_, last_z_);
+  return activation_.apply(last_z_);
 }
 
 Vector Layer::backward(const Vector &grad_output, const Optimizer &optimizer) {
@@ -45,7 +45,7 @@ Vector Layer::backward(const Vector &grad_output, const Optimizer &optimizer) {
     throw std::runtime_error("Optimizer cache not initialized");
   }
 
-  Vector deriv = activation_.derivative(activation_type_, last_z_);
+  Vector deriv = activation_.derivative(last_z_);
   Vector dz = grad_output.array() * deriv.array();
 
   Matrix grad_w = dz * last_input_.transpose();
@@ -67,7 +67,7 @@ template <class Reader> void Layer::read(Reader &in) {
   int af_code;
   in >> af_code;
   activation_type_ = static_cast<ActivationFunction::Type>(af_code);
-  activation_ = ActivationFunction(activation_type_);
+  activation_ = ActivationFunction::create(activation_type_);
 
   in >> weights_;
   in >> biases_;

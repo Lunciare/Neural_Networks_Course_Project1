@@ -1,21 +1,24 @@
 #pragma once
+#include "Utilities/Utils.h"
 #include <filesystem>
 #include <fstream>
-#include <vector>
 
 namespace neural_network {
 
 class FileWriter {
 public:
-  explicit FileWriter(const std::filesystem::path &file);
+  explicit FileWriter(const std::filesystem::path &path);
+  template <typename T> FileWriter &operator<<(const T &value);
 
-  template <class T> FileWriter &operator<<(const T &x);
-
-private:
-  std::ofstream file_;
+  std::ofstream out_;
 };
 
-template <class T, class A>
-FileWriter &operator<<(FileWriter &w, const std::vector<T, A> &vec);
+// Специализации
+FileWriter &operator<<(FileWriter &w, const Vector &v);
+FileWriter &operator<<(FileWriter &w, const Matrix &m);
+FileWriter &operator<<(FileWriter &w,
+                       const class Layer &layer); // 👈 добавь это
+template <typename T>
+FileWriter &operator<<(FileWriter &w, const std::vector<T> &v);
 
 } // namespace neural_network

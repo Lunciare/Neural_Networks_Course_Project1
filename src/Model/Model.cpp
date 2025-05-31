@@ -11,7 +11,8 @@ Model::Model(std::initializer_list<size_t> layer_sizes,
 
   auto it = activations.begin();
   for (auto i = layer_sizes.begin(); i + 1 != layer_sizes.end(); ++i, ++it) {
-    layers_.emplace_back(In(*i), Out(*(i + 1)), *it);
+    ActivationFunction func = ActivationFunction::create(*it);
+    layers_.emplace_back(In(*i), Out(*(i + 1)), func);
   }
 }
 
@@ -32,10 +33,10 @@ std::vector<Vector> Model::forwardTrain(const Vector &x) const {
   return activations;
 }
 
-void Model::backward(const Vector &grad) {
+void Model::backward(const Vector &grad, const Optimizer &opt) {
   Vector g = grad;
   for (int i = layers_.size() - 1; i >= 0; --i) {
-    g = layers_[i].backward(g);
+    g = layers_[i].backward(g, opt);
   }
 }
 
@@ -46,10 +47,7 @@ void Model::trainStep(
   auto activations = forwardTrain(x);
   Vector grad = lossGrad(activations.back(), y);
 
-  for (auto &layer : layers_)
-    layer.setOptimizer(&optimizer);
-
-  backward(grad);
+  backward(grad, optimizer);
 }
 
 void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,

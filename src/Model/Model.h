@@ -28,7 +28,7 @@ private:
   std::vector<Layer> layers_;
 
   std::vector<Vector> forwardTrain(const Vector &x) const;
-  void backward(const Vector &grad);
+  void backward(const Vector &grad, const Optimizer &opt);
 
   void trainStep(
       const Vector &x, const Vector &y,

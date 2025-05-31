@@ -1,27 +1,53 @@
+// FileWriter.cpp
 #include "Utilities/FileWriter.h"
-#include <cassert>
+#include "Layers/Layer.h"
 
 namespace neural_network {
 
-FileWriter::FileWriter(const std::filesystem::path &file) : file_(file) {
-  assert(file_.is_open() && "Failed to open file for writing");
+FileWriter::FileWriter(const std::filesystem::path &path) : out_(path) {
+  if (!out_)
+    throw std::runtime_error("Failed to open file for writing");
 }
 
-template <class T> FileWriter &FileWriter::operator<<(const T &x) {
-  file_ << x << ' ';
+template <typename T> FileWriter &FileWriter::operator<<(const T &value) {
+  out_ << value << '\n';
   return *this;
 }
 
-// Instantiate explicitly for common usage
-template FileWriter &FileWriter::operator<<(const int &);
-template FileWriter &FileWriter::operator<<(const double &);
-
-template <class T, class A>
-FileWriter &operator<<(FileWriter &w, const std::vector<T, A> &vec) {
-  w << vec.size();
-  for (const auto &x : vec)
-    w << x;
+FileWriter &operator<<(FileWriter &w, const Vector &v) {
+  w.out_ << v.size() << '\n';
+  for (Index i = 0; i < v.size(); ++i)
+    w.out_ << v(i) << ' ';
+  w.out_ << '\n';
   return w;
 }
+
+FileWriter &operator<<(FileWriter &w, const Matrix &m) {
+  w.out_ << m.rows() << ' ' << m.cols() << '\n';
+  for (Index i = 0; i < m.rows(); ++i) {
+    for (Index j = 0; j < m.cols(); ++j)
+      w.out_ << m(i, j) << ' ';
+    w.out_ << '\n';
+  }
+  return w;
+}
+
+FileWriter &operator<<(FileWriter &w, const Layer &layer) {
+  layer.write(w); // вызывает Layer::write<FileWriter>
+  return w;
+}
+
+template <typename T>
+FileWriter &operator<<(FileWriter &w, const std::vector<T> &v) {
+  w << static_cast<Index>(v.size());
+  for (const auto &e : v)
+    w << e;
+  return w;
+}
+
+// explicit instantiations
+template FileWriter &FileWriter::operator<<(const int &);
+template FileWriter &FileWriter::operator<<(const double &);
+template FileWriter &FileWriter::operator<<(const std::string &);
 
 } // namespace neural_network

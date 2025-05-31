@@ -14,6 +14,7 @@ namespace neural_network {
 class Layer {
 public:
   Layer(In in, Out out, ActivationFunction activation);
+  Layer() = default;
 
   Vector forward(const Vector &input);
   Vector predict(const Vector &input) const;
