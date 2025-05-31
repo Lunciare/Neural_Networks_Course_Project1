@@ -16,26 +16,30 @@ Model::Model(std::initializer_list<size_t> layer_sizes,
   }
 }
 
-Vector Model::forward(const Vector &input) const {
+// Прямой проход (inference). Теперь НЕ const, чтобы мы могли вызывать
+// forwardTrain() на слоях
+Vector Model::forward(const Vector &input) {
   Vector x = input;
-  for (const auto &layer : layers_) {
-    x = layer.predict(x);
+  for (auto &layer : layers_) {
+    // forwardTrain() сохраняет внутренние кэши в слое
+    x = layer.forwardTrain(x);
   }
   return x;
 }
 
-std::vector<Vector> Model::forwardTrain(const Vector &x) const {
+// Прямой проход при обучении (gather all activations). Не const, т.к.
+// forwardTrain() меняет слой.
+std::vector<Vector> Model::forwardTrain(const Vector &x) {
   std::vector<Vector> activations;
   activations.reserve(layers_.size() + 1);
 
   Vector current = x;
   activations.push_back(current);
 
-  for (const auto &layer : layers_) {
-    current = layer.predict(current);
+  for (auto &layer : layers_) {
+    current = layer.forwardTrain(current);
     activations.push_back(current);
   }
-
   return activations;
 }
 
@@ -50,15 +54,21 @@ void Model::trainStep(
     const Vector &x, const Vector &y,
     const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
     Optimizer &optimizer) {
+  // 1) Инициализируем Optimizer-кэш в каждом слое
   for (auto &layer : layers_) {
     layer.set_cache(optimizer);
   }
 
+  // 2) Делаем forwardTrain, чтобы посчитать все активации и получить градиент
+  // на выходе
   auto activations = forwardTrain(x);
   Vector grad = lossGrad(activations.back(), y);
 
+  // 3) Backward: в каждом Layer::backward(...) вызывается optimizer.update(...)
   backward(grad, optimizer);
 
+  // 4) Очистим кэш каждого слоя (иначе данные будут “висячими” до следующего
+  // trainStep)
   for (auto &layer : layers_) {
     layer.free_cache();
   }
@@ -75,5 +85,15 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
 }
 
 const std::vector<Layer> &Model::layers() const { return layers_; }
+
+// ==================== Реализация шаблонных методов ====================
+// (ранее вызывала ошибку “no member named read/write”)
+template <class Reader> void Model::read(Reader &in) { in >> layers_; }
+
+template <class Writer> void Model::write(Writer &out) const { out << layers_; }
+
+// Явные инстанцирования шаблонов (чтобы не было “undefined reference”)
+template void Model::read(FileReader &);
+template void Model::write(FileWriter &) const;
 
 } // namespace neural_network
