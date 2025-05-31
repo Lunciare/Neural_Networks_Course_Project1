@@ -4,6 +4,8 @@
 #include "Optimizer/Optimizer.h"
 #include "Utilities/Utils.h"
 
+#include <any>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,12 +18,12 @@ public:
   Vector forward(const Vector &input);
   Vector predict(const Vector &input) const;
   Vector forwardTrain(const Vector &input); // saves input/z
-  Vector backward(const Vector &grad_output);
+  Vector backward(const Vector &grad_output, const Optimizer &optimizer);
 
-  void setOptimizer(Optimizer *optimizer);
+  void set_cache(const Optimizer &opt);
+  void free_cache();
 
   template <class Reader> void read(Reader &in);
-
   template <class Writer> void write(Writer &out) const;
 
 private:
@@ -34,18 +36,11 @@ private:
   Matrix weights_;
   Vector biases_;
 
-  // Adam optimizer moments
-  Matrix m_w_;
-  Matrix v_w_;
-  Vector m_b_;
-  Vector v_b_;
-  Index t_;
+  std::any cache_; // cache from Optimizer
 
   // Caches for backprop
   Vector last_input_;
   Vector last_z_;
-
-  Optimizer *optimizer_;
 };
 
 } // namespace neural_network

@@ -18,10 +18,8 @@ Vector Layer::initBiases(Out out) { return Vector::Zero(out); }
 
 Layer::Layer(In in, Out out, ActivationFunction activation)
     : weights_(initWeights(out, in)), biases_(initBiases(out)),
-      m_w_(Matrix::Zero(out, in)), v_w_(Matrix::Zero(out, in)),
-      m_b_(Vector::Zero(out)), v_b_(Vector::Zero(out)), t_(0),
       last_input_(Vector::Zero(in)), last_z_(Vector::Zero(out)),
-      optimizer_(nullptr), activation_(std::move(activation)) {}
+      activation_(std::move(activation)) {}
 
 Vector Layer::forward(const Vector &input) {
   assert(input.size() == weights_.cols());
@@ -42,8 +40,10 @@ Vector Layer::forwardTrain(const Vector &input) {
   return activation_.apply(activation_type_, last_z_);
 }
 
-Vector Layer::backward(const Vector &grad_output) {
-  ++t_;
+Vector Layer::backward(const Vector &grad_output, const Optimizer &optimizer) {
+  if (!cache_.has_value()) {
+    throw std::runtime_error("Optimizer cache not initialized");
+  }
 
   Vector deriv = activation_.derivative(activation_type_, last_z_);
   Vector dz = grad_output.array() * deriv.array();
@@ -51,34 +51,31 @@ Vector Layer::backward(const Vector &grad_output) {
   Matrix grad_w = dz * last_input_.transpose();
   Vector grad_b = dz;
 
-  if (optimizer_) {
-    optimizer_->update(weights_, m_w_, v_w_, grad_w, t_);
-    optimizer_->update(biases_, m_b_, v_b_, grad_b, t_);
-  }
+  optimizer.update(weights_, cache_, grad_w);
+  optimizer.update(biases_, cache_, grad_b);
 
   return weights_.transpose() * dz;
 }
 
-void Layer::setOptimizer(Optimizer *optimizer) { optimizer_ = optimizer; }
+void Layer::set_cache(const Optimizer &opt) {
+  cache_ = opt.init_cache(weights_.rows(), weights_.cols());
+}
+
+void Layer::free_cache() { cache_.reset(); }
 
 template <class Reader> void Layer::read(Reader &in) {
-  int activation_int;
-  in >> activation_int;
-  activation_type_ = static_cast<ActivationFunction::Type>(activation_int);
-  activation_ = ActivationFunction(); // simple re-init, no params
+  int af_code;
+  in >> af_code;
+  activation_type_ = static_cast<ActivationFunction::Type>(af_code);
+  activation_ = ActivationFunction(activation_type_);
 
   in >> weights_;
   in >> biases_;
 
-  // reset moments and time step
-  m_w_ = Matrix::Zero(weights_.rows(), weights_.cols());
-  v_w_ = Matrix::Zero(weights_.rows(), weights_.cols());
-  m_b_ = Vector::Zero(biases_.size());
-  v_b_ = Vector::Zero(biases_.size());
-  t_ = 0;
-
   last_input_ = Vector::Zero(weights_.cols());
   last_z_ = Vector::Zero(weights_.rows());
+
+  cache_.reset();
 }
 
 template <class Writer> void Layer::write(Writer &out) const {
@@ -87,7 +84,7 @@ template <class Writer> void Layer::write(Writer &out) const {
   out << biases_;
 }
 
-// Explicit instantiations
+// explicit instantiations
 template void Layer::read(FileReader &);
 template void Layer::write(FileWriter &) const;
 
