@@ -57,9 +57,17 @@ TestStatus testOptimizerAdam() {
   Matrix w = Matrix::Ones(1, 1);
   Matrix grad = Matrix::Ones(1, 1);
 
+  // Инициализируем кэш
   std::any cache = opt.init_cache(w.rows(), w.cols());
-  opt.update(w, cache, grad);
 
+  try {
+    opt.update(w, cache, grad);
+  } catch (const std::exception &e) {
+    std::cerr << "[FAIL] Optimizer::Adam threw exception: " << e.what() << "\n";
+    return TestStatus::Error;
+  }
+
+  // Проверка: Adam не должен менять вес с первого шага слишком сильно
   if (w(0, 0) >= 1.0 || w(0, 0) <= 0.98) {
     std::cout << "[FAIL] Optimizer::Adam weight update incorrect, got w = "
               << w(0, 0) << "\n";
