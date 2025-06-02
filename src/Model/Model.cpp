@@ -19,7 +19,7 @@ Model::Model(std::initializer_list<size_t> layer_sizes,
 Vector Model::forward(const Vector &input) {
   Vector x = input;
   for (auto &layer : layers_) {
-    x = layer.forwardTrain(x);
+    x = layer.forward(x);
   }
   return x;
 }
@@ -32,7 +32,7 @@ std::vector<Vector> Model::forwardTrain(const Vector &x) {
   activations.push_back(current);
 
   for (auto &layer : layers_) {
-    current = layer.forwardTrain(current);
+    current = layer.forward(current);
     activations.push_back(current);
   }
   return activations;

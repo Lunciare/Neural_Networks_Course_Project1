@@ -7,7 +7,7 @@ namespace neural_network {
 
 class ActivationFunction {
 public:
-  enum class Type { ReLU, Sigmoid, Identity, Tanh, Softmax };
+  enum class Type { ReLU, Sigmoid, Identity, Tanh };
 
   using Function = std::function<Vector(const Vector &)>;
 

@@ -18,7 +18,7 @@ public:
 
   Vector forward(const Vector &input);
   Vector predict(const Vector &input) const;
-  Vector forwardTrain(const Vector &input); // saves input/z
+
   Vector backward(const Vector &grad_output, const Optimizer &optimizer);
 
   void set_cache(const Optimizer &opt);

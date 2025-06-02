@@ -39,12 +39,6 @@ Vector Layer::predict(const Vector &input) const {
   return activation_.apply(z);
 }
 
-Vector Layer::forwardTrain(const Vector &input) {
-  last_input_ = input;
-  last_z_ = weights_ * input + biases_;
-  return activation_.apply(last_z_);
-}
-
 Vector Layer::backward(const Vector &grad_output, const Optimizer &optimizer) {
   if (!cache_.has_value()) {
     throw std::runtime_error("Optimizer cache not initialized");
