@@ -39,6 +39,8 @@ int main() {
 
   const int barWidth = 30;
   double running_loss = 0.0;
+  std::ofstream loss_file("loss.csv");
+  loss_file << "Step,Loss\n";
 
   std::cout << "\n=== Training (1 epoch) ===\n";
 
@@ -50,6 +52,7 @@ int main() {
     double loss_i = LossFunction::mse(out, train_targets[i]);
     running_loss += loss_i;
     double avgLoss = running_loss / (i + 1);
+    loss_file << (i + 1) << "," << avgLoss << "\n";
 
     float fraction = static_cast<float>(i + 1) / N;
     int pos = static_cast<int>(barWidth * fraction);
@@ -66,6 +69,7 @@ int main() {
               << std::flush;
   }
 
+  loss_file.close();
   std::cout << "\n\n=== Training finished ===\n";
 
   std::vector<Vector> test_images;
@@ -78,14 +82,25 @@ int main() {
   std::cout << "Test size: " << test_images.size() << "\n";
 
   int correct = 0;
+  std::ofstream cm_file("predictions.csv");
+  cm_file << "True,Predicted\n";
+
   for (size_t i = 0; i < test_images.size(); ++i) {
     Vector out = model.forward(test_images[i]);
     Eigen::Index predIndex;
     out.maxCoeff(&predIndex);
-    if (static_cast<int>(predIndex) == test_labels[i]) {
+    int predicted = static_cast<int>(predIndex);
+    int truth = test_labels[i];
+
+    cm_file << truth << "," << predicted << "\n";
+
+    if (predicted == truth) {
       ++correct;
     }
   }
+
+  cm_file.close();
+
   double accuracy = 100.0 * static_cast<double>(correct) / test_images.size();
   std::cout << "\nTest Accuracy: " << std::fixed << std::setprecision(4)
             << accuracy << "%\n";
