@@ -50,7 +50,7 @@ void Model::trainStep(
     const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
     Optimizer &optimizer) {
   for (auto &layer : layers_) {
-    layer.set_cache(optimizer);
+    layer.setCache(optimizer);
   }
 
   auto activations = forwardTrain(x);
@@ -59,7 +59,7 @@ void Model::trainStep(
   backward(grad, optimizer);
 
   for (auto &layer : layers_) {
-    layer.free_cache();
+    layer.freeCache();
   }
 }
 

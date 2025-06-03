@@ -56,11 +56,11 @@ Vector Layer::backward(const Vector &grad_output, const Optimizer &optimizer) {
   return weights_.transpose() * dz;
 }
 
-void Layer::set_cache(const Optimizer &opt) {
+void Layer::setCache(const Optimizer &opt) {
   cache_ = opt.init_cache(weights_.rows(), weights_.cols());
 }
 
-void Layer::free_cache() { cache_.reset(); }
+void Layer::freeCache() { cache_.reset(); }
 
 template <class Reader> void Layer::read(Reader &in) {
   int af_code;

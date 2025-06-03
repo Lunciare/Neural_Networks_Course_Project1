@@ -21,8 +21,8 @@ public:
 
   Vector backward(const Vector &grad_output, const Optimizer &optimizer);
 
-  void set_cache(const Optimizer &opt);
-  void free_cache();
+  void setCache(const Optimizer &opt);
+  void freeCache();
 
   template <class Reader> void read(Reader &in);
   template <class Writer> void write(Writer &out) const;

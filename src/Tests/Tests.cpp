@@ -79,7 +79,7 @@ TestStatus testLayerForwardBackward() {
   Optimizer opt = Optimizer::Adam(0.01, 0.9, 0.999, 1e-8);
   Layer l(In(2), Out(1),
           ActivationFunction::create(ActivationFunction::Type::Identity));
-  l.set_cache(opt);
+  l.setCache(opt);
 
   Vector input(2);
   input << 1.0, -1.0;
