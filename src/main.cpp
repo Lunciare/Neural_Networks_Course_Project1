@@ -3,7 +3,6 @@
 #include "Model/Model.h"
 #include "Optimizer/Optimizer.h"
 #include "Tests/Tests.h"
-#include "Utilities/FileReader.h"
 #include "Utilities/FileWriter.h"
 #include "Utilities/Random.h"
 #include "Utilities/Utils.h"
@@ -14,130 +13,128 @@
 
 using namespace neural_network;
 
-void trainAndEvaluate(
-    Model &model, const std::vector<Vector> &train_images,
-    const std::vector<Vector> &train_targets,
-    const std::vector<Vector> &test_images, const std::vector<int> &test_labels,
-    const std::string &model_name, int epochs,
-    const std::function<Vector(const Vector &, const Vector &)> &lossGrad,
-    const std::function<double(const Vector &, const Vector &)> &lossFunc) {
-  Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
-
-  const int N = train_images.size();
-  const int barWidth = 30;
-  double running_loss = 0.0;
-  std::ofstream loss_file("loss_" + model_name + ".csv");
-  loss_file << "Step,Loss\n";
-
-  std::cout << "\n=== Training " << model_name << " for " << epochs
-            << " epoch(s) ===\n";
-
-  for (int e = 0; e < epochs; ++e) {
-    running_loss = 0.0;
-    for (int i = 0; i < N; ++i) {
-      model.trainStep(train_images[i], train_targets[i], lossGrad, opt);
-
-      Vector out = model.forward(train_images[i]);
-      double loss_i = lossFunc(out, train_targets[i]);
-      running_loss += loss_i;
-      double avgLoss = running_loss / (i + 1);
-      loss_file << (e * N + i + 1) << "," << avgLoss << "\n";
-
-      float fraction = float(i + 1) / N;
-      int pos = int(barWidth * fraction);
-      int percent = int(fraction * 100.0f);
-      std::cout << "\r[";
-      for (int j = 0; j < barWidth; ++j)
-        std::cout << (j < pos ? '=' : ' ');
-      std::cout << "] " << std::setw(3) << percent << "% "
-                << "(" << (i + 1) << "/" << N << ") "
-                << "L:" << std::fixed << std::setprecision(4) << avgLoss
-                << std::flush;
-    }
-    std::cout << "\nEpoch " << (e + 1) << " finished.\n";
-  }
-
-  loss_file.close();
-  {
-    FileWriter fw("model_" + model_name + ".bin");
-    fw << model;
-  }
-
-  // Accuracy evaluation
-  int correct = 0;
-  std::ofstream cm_file("predictions_" + model_name + ".csv");
-  cm_file << "True,Predicted\n";
-
-  for (size_t i = 0; i < test_images.size(); ++i) {
-    Vector out = model.forward(test_images[i]);
-    Eigen::Index predIndex;
-    out.maxCoeff(&predIndex);
-    int predicted = predIndex;
-    int truth = test_labels[i];
-
-    cm_file << truth << "," << predicted << "\n";
-    if (predicted == truth)
-      ++correct;
-  }
-  cm_file.close();
-
-  double accuracy = 100.0 * double(correct) / test_images.size();
-  std::cout << "\n"
-            << model_name << " Test Accuracy: " << std::fixed
-            << std::setprecision(4) << accuracy << "%\n";
-}
-
 int main() {
   test::runAllTests();
 
-  std::vector<Vector> train_images;
-  std::vector<int> train_labels;
+  std::vector<Vector> train_images, test_images;
+  std::vector<int> train_labels, test_labels;
   if (!loadMNIST("../data/train-images.idx3-ubyte",
                  "../data/train-labels.idx1-ubyte", train_images,
-                 train_labels)) {
-    std::cerr << "Failed to load MNIST training data!\n";
+                 train_labels) ||
+      !loadMNIST("../data/t10k-images.idx3-ubyte",
+                 "../data/t10k-labels.idx1-ubyte", test_images, test_labels)) {
+    std::cerr << "Failed to load MNIST data!\n";
     return 1;
   }
 
-  std::vector<Vector> train_targets;
-  train_targets.reserve(train_labels.size());
+  std::vector<Vector> train_targets, test_targets;
   for (int lbl : train_labels) {
     Vector y = Vector::Zero(10);
     y[lbl] = 1.0;
     train_targets.push_back(y);
   }
-
-  std::vector<Vector> test_images;
-  std::vector<int> test_labels;
-  if (!loadMNIST("../data/t10k-images.idx3-ubyte",
-                 "../data/t10k-labels.idx1-ubyte", test_images, test_labels)) {
-    std::cerr << "Failed to load MNIST test data!\n";
-    return 1;
+  for (int lbl : test_labels) {
+    Vector y = Vector::Zero(10);
+    y[lbl] = 1.0;
+    test_targets.push_back(y);
   }
 
-  int epochs = 1;
-  std::cout << "Enter number of epochs: ";
+  std::cout << "Select model architecture:\n";
+  std::cout << "1. One hidden layer (ReLU + Identity)\n";
+  std::cout << "2. Two hidden layers (Sigmoid + ReLU + Identity)\n";
+  std::cout << "3. Three hidden layers (Tanh + Sigmoid + ReLU + Identity)\n";
+  int choice;
+  std::cout << "Enter choice (1/2/3): ";
+  std::cin >> choice;
+
+  int epochs;
+  std::cout << "Enter number of training epochs: ";
   std::cin >> epochs;
 
-  Model model1({784, 128, 10}, {ActivationFunction::Type::ReLU,
-                                ActivationFunction::Type::Identity});
-  Model model2({784, 128, 64, 10},
-               {ActivationFunction::Type::ReLU, ActivationFunction::Type::Tanh,
-                ActivationFunction::Type::Identity});
-  Model model3({784, 256, 128, 64, 10},
-               {ActivationFunction::Type::ReLU, ActivationFunction::Type::ReLU,
-                ActivationFunction::Type::Sigmoid,
-                ActivationFunction::Type::Identity});
+  std::string model_name = "model" + std::to_string(choice);
+  Model model =
+      (choice == 1)
+          ? Model({784, 128, 10}, {ActivationFunction::Type::ReLU,
+                                   ActivationFunction::Type::Identity})
+      : (choice == 2)
+          ? Model({784, 64, 64, 10}, {ActivationFunction::Type::Sigmoid,
+                                      ActivationFunction::Type::ReLU,
+                                      ActivationFunction::Type::Identity})
+          : Model({784, 32, 32, 32, 10}, {ActivationFunction::Type::Tanh,
+                                          ActivationFunction::Type::Sigmoid,
+                                          ActivationFunction::Type::ReLU,
+                                          ActivationFunction::Type::Identity});
 
-  trainAndEvaluate(model1, train_images, train_targets, test_images,
-                   test_labels, "model1", epochs, LossFunction::mseGrad,
-                   LossFunction::mse);
-  trainAndEvaluate(model2, train_images, train_targets, test_images,
-                   test_labels, "model2", epochs, LossFunction::mseGrad,
-                   LossFunction::mse);
-  trainAndEvaluate(model3, train_images, train_targets, test_images,
-                   test_labels, "model3", epochs,
-                   LossFunction::crossEntropyGrad, LossFunction::crossEntropy);
+  Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
+
+  std::ofstream train_loss_file("loss_" + model_name + "_train.csv");
+  std::ofstream val_loss_file("loss_" + model_name + "_val.csv");
+  std::ofstream acc_file("accuracy_" + model_name + ".csv");
+
+  train_loss_file << "Epoch,Loss\n";
+  val_loss_file << "Epoch,Loss\n";
+  acc_file << "Epoch,Accuracy\n";
+
+  const int barWidth = 30;
+
+  std::cout << "\n=== Training " << model_name << " for " << epochs
+            << " epoch(s) ===\n";
+
+  for (int e = 0; e < epochs; ++e) {
+    double running_loss = 0.0;
+    for (int i = 0; i < static_cast<int>(train_images.size()); ++i) {
+      model.trainStep(train_images[i], train_targets[i], LossFunction::mseGrad,
+                      opt);
+      Vector out = model.forward(train_images[i]);
+      running_loss += LossFunction::mse(out, train_targets[i]);
+
+      float fraction = float(i + 1) / train_images.size();
+      int pos = int(barWidth * fraction);
+      int percent = int(fraction * 100.0f);
+
+      std::cout << "\r[";
+      for (int j = 0; j < barWidth; ++j) {
+        std::cout << (j < pos ? '=' : ' ');
+      }
+      std::cout << "] " << std::setw(3) << percent << "% "
+                << "(" << (i + 1) << "/" << train_images.size() << ") "
+                << "L:" << std::fixed << std::setprecision(4)
+                << (running_loss / (i + 1)) << std::flush;
+    }
+
+    double avg_train_loss = running_loss / train_images.size();
+    train_loss_file << (e + 1) << "," << avg_train_loss << "\n";
+
+    double val_loss = 0.0;
+    int correct = 0;
+    for (int i = 0; i < static_cast<int>(test_images.size()); ++i) {
+      Vector out = model.forward(test_images[i]);
+      val_loss += LossFunction::mse(out, test_targets[i]);
+
+      Eigen::Index predIndex;
+      out.maxCoeff(&predIndex);
+      if (predIndex == test_labels[i])
+        ++correct;
+    }
+
+    double avg_val_loss = val_loss / test_images.size();
+    double accuracy = 100.0 * double(correct) / test_images.size();
+
+    val_loss_file << (e + 1) << "," << avg_val_loss << "\n";
+    acc_file << (e + 1) << "," << accuracy << "\n";
+
+    std::cout << "\nEpoch " << (e + 1)
+              << " finished. Train Loss: " << avg_train_loss
+              << ", Val Loss: " << avg_val_loss << ", Accuracy: " << accuracy
+              << "%\n";
+  }
+
+  train_loss_file.close();
+  val_loss_file.close();
+  acc_file.close();
+
+  FileWriter out("model_" + model_name + ".bin");
+  out << model;
 
   return 0;
 }

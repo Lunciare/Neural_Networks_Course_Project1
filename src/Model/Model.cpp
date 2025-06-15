@@ -9,12 +9,15 @@ Model::Model(std::initializer_list<size_t> layer_sizes,
 
   auto it = activations.begin();
   for (auto i = layer_sizes.begin(); i + 1 != layer_sizes.end(); ++i, ++it) {
-    ActivationFunction func = ActivationFunction::create(*it);
-    layers_.emplace_back(In(*i), Out(*(i + 1)), func);
+    layers_.emplace_back(In(*i), Out(*(i + 1)),
+                         ActivationFunction::create(*it));
   }
 }
 
 Vector Model::forward(const Vector &input) {
+  if (layers_.empty()) {
+    throw std::runtime_error("Model has no layers.");
+  }
   Vector x = input;
   for (auto &layer : layers_) {
     x = layer.forward(x);
