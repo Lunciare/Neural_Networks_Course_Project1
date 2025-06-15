@@ -16,6 +16,7 @@ class FileWriter;
 
 class Layer {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
   Layer();
   Layer(In in, Out out, ActivationFunction activation);
 

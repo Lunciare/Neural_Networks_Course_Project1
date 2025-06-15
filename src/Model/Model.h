@@ -27,10 +27,10 @@ public:
   void train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
              int epochs, LossFunction loss, Optimizer &optimizer);
 
-  const std::vector<Layer> &layers() const;
+  const std::vector<Layer, Eigen::aligned_allocator<Layer>> &layers() const;
 
 private:
-  std::vector<Layer> layers_;
+  std::vector<Layer, Eigen::aligned_allocator<Layer>> layers_;
 
   std::vector<Vector> forwardTrain(const Vector &x);
 

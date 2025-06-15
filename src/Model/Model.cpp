@@ -1,4 +1,5 @@
 #include "Model/Model.h"
+#include <Eigen/Core>
 #include <cassert>
 
 namespace neural_network {
@@ -74,6 +75,9 @@ void Model::train(const std::vector<Vector> &xs, const std::vector<Vector> &ys,
   }
 }
 
-const std::vector<Layer> &Model::layers() const { return layers_; }
+const std::vector<Layer, Eigen::aligned_allocator<Layer>> &
+Model::layers() const {
+  return layers_;
+}
 
 } // namespace neural_network

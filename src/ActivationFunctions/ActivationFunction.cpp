@@ -30,8 +30,10 @@ ActivationFunction ActivationFunction::Sigmoid() {
         return (1.0 / (1.0 + (-x.array()).exp())).matrix();
       },
       [](const Vector &x) {
-        Vector sig = (1.0 / (1.0 + (-x.array()).exp())).matrix();
-        return (sig.array() * (1.0 - sig.array())).matrix();
+        return x.unaryExpr([](double v) {
+          const double s = 1.0 / (1.0 + std::exp(-v));
+          return s * (1.0 - s);
+        });
       });
 }
 
