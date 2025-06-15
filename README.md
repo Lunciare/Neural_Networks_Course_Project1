@@ -62,4 +62,4 @@ Alexandra Suvorova
 
 ## Supervisor
 
-Dmitriy Trushin
+Dima Trushin
