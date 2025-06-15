@@ -2,11 +2,15 @@
 
 #include "Layers/Layer.h"
 #include "LossFunctions/LossFunction.h"
+
 #include <functional>
 #include <initializer_list>
 #include <vector>
 
 namespace neural_network {
+
+class FileReader;
+class FileWriter;
 
 class Model {
 public:
@@ -31,6 +35,9 @@ private:
   std::vector<Vector> forwardTrain(const Vector &x);
 
   void backward(const Vector &grad, const Optimizer &opt);
+
+  friend FileReader &operator>>(FileReader &, Model &);
+  friend FileWriter &operator<<(FileWriter &, const Model &);
 };
 
 } // namespace neural_network

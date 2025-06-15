@@ -11,6 +11,9 @@
 
 namespace neural_network {
 
+class FileReader;
+class FileWriter;
+
 class Layer {
 public:
   Layer();
@@ -39,6 +42,9 @@ private:
   // Caches for backprop
   Vector last_input_;
   Vector last_z_;
+
+  friend FileReader &operator>>(FileReader &, Layer &l);
+  friend FileWriter &operator<<(FileWriter &, const Layer &l);
 };
 
 } // namespace neural_network

@@ -1,28 +1,31 @@
 #pragma once
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
-
-#include "Layers/Layer.h"
-#include "Utilities/Utils.h"
 
 namespace neural_network {
 
 class FileReader {
 public:
-  explicit FileReader(const std::string &filename);
-  std::ifstream in_;
+  explicit FileReader(const std::filesystem::path &file);
+  ~FileReader();
+
+  template <typename T> FileReader &operator>>(T &x);
+
+private:
+  std::ifstream file_;
 };
 
-FileReader &operator>>(FileReader &r, int &value);
-FileReader &operator>>(FileReader &r, size_t &value);
-FileReader &operator>>(FileReader &r, long &value);
-FileReader &operator>>(FileReader &r, double &value);
+template <typename T> FileReader &FileReader::operator>>(T &x) {
+  file_ >> x;
+  return *this;
+}
 
-FileReader &operator>>(FileReader &r, Vector &v);
-FileReader &operator>>(FileReader &r, Matrix &m);
+template <typename T> FileReader &operator>>(FileReader &r, std::vector<T> &v);
 
-FileReader &operator>>(FileReader &r, std::vector<Layer> &v);
+FileReader &operator>>(FileReader &r, Model &m);
+FileReader &operator>>(FileReader &r, Layer &l);
 
 } // namespace neural_network

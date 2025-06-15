@@ -1,6 +1,4 @@
 #include "Model/Model.h"
-#include "Utilities/FileReader.h"
-#include "Utilities/FileWriter.h"
 #include <cassert>
 
 namespace neural_network {

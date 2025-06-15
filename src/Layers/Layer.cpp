@@ -1,4 +1,6 @@
 #include "Layers/Layer.h"
+#include "Utilities/FileReader.h"
+#include "Utilities/FileWriter.h"
 #include "Utilities/Random.h"
 
 #include <cassert>
