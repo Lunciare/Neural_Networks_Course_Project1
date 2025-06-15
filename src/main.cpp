@@ -22,7 +22,7 @@ int main() {
     std::cerr << "Failed to load MNIST training data!\n";
     return 1;
   }
-  const int N = static_cast<int>(train_images.size());
+  int N = train_images.size();
   std::cout << "Train size: " << N << "\n";
 
   Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
@@ -54,9 +54,9 @@ int main() {
     double avgLoss = running_loss / (i + 1);
     loss_file << (i + 1) << "," << avgLoss << "\n";
 
-    float fraction = static_cast<float>(i + 1) / N;
-    int pos = static_cast<int>(barWidth * fraction);
-    int percent = static_cast<int>(fraction * 100.0f);
+    float fraction = float(i + 1) / N;
+    int pos = int(barWidth * fraction);
+    int percent = int(fraction * 100.0f);
 
     std::cout << "\r[";
     for (int j = 0; j < barWidth; ++j) {
@@ -85,11 +85,11 @@ int main() {
   std::ofstream cm_file("predictions.csv");
   cm_file << "True,Predicted\n";
 
-  for (size_t i = 0; i < test_images.size(); ++i) {
+  for (int i = 0; i < test_images.size(); ++i) {
     Vector out = model.forward(test_images[i]);
     Eigen::Index predIndex;
     out.maxCoeff(&predIndex);
-    int predicted = static_cast<int>(predIndex);
+    int predicted = predIndex;
     int truth = test_labels[i];
 
     cm_file << truth << "," << predicted << "\n";
@@ -101,7 +101,7 @@ int main() {
 
   cm_file.close();
 
-  double accuracy = 100.0 * static_cast<double>(correct) / test_images.size();
+  double accuracy = 100.0 * double(correct) / test_images.size();
   std::cout << "\nTest Accuracy: " << std::fixed << std::setprecision(4)
             << accuracy << "%\n";
 

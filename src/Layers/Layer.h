@@ -24,9 +24,6 @@ public:
   void setCache(const Optimizer &opt);
   void freeCache();
 
-  template <class Reader> void read(Reader &in);
-  template <class Writer> void write(Writer &out) const;
-
 private:
   static Matrix initWeights(Out out, In in);
   static Vector initBiases(Out out);

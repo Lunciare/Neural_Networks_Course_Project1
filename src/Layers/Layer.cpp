@@ -1,6 +1,4 @@
 #include "Layers/Layer.h"
-#include "Utilities/FileReader.h"
-#include "Utilities/FileWriter.h"
 #include "Utilities/Random.h"
 
 #include <cassert>
@@ -61,30 +59,5 @@ void Layer::setCache(const Optimizer &opt) {
 }
 
 void Layer::freeCache() { cache_.reset(); }
-
-template <class Reader> void Layer::read(Reader &in) {
-  int af_code;
-  in >> af_code;
-  activation_type_ = static_cast<ActivationFunction::Type>(af_code);
-  activation_ = ActivationFunction::create(activation_type_);
-
-  in >> weights_;
-  in >> biases_;
-
-  last_input_ = Vector::Zero(weights_.cols());
-  last_z_ = Vector::Zero(weights_.rows());
-
-  cache_.reset();
-}
-
-template <class Writer> void Layer::write(Writer &out) const {
-  out << static_cast<int>(activation_type_);
-  out << weights_;
-  out << biases_;
-}
-
-// explicit instantiations
-template void Layer::read(FileReader &);
-template void Layer::write(FileWriter &) const;
 
 } // namespace neural_network

@@ -8,23 +8,23 @@ using Matrix = Eigen::MatrixXd;
 using Vector = Eigen::VectorXd;
 using Index = Eigen::Index;
 
-class In {
+template <typename T, typename Tag> class StrongAlias {
 public:
-  explicit In(Index v) : value_(v) {}
-  operator Index() const { return value_; }
+  explicit StrongAlias(T value) : value_(value) {}
+
+  operator T() const { return value_; }
+
+  T get() const { return value_; }
 
 private:
-  Index value_;
+  T value_;
 };
 
-class Out {
-public:
-  explicit Out(Index v) : value_(v) {}
-  operator Index() const { return value_; }
+struct InTag {};
+struct OutTag {};
 
-private:
-  Index value_;
-};
+using In = StrongAlias<Index, InTag>;
+using Out = StrongAlias<Index, OutTag>;
 
 template <typename T> Index size(const std::vector<T> &vec) {
   return static_cast<Index>(vec.size());

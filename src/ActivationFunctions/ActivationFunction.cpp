@@ -61,7 +61,7 @@ ActivationFunction ActivationFunction::create(Type type) {
     return Tanh();
   default:
     assert(false && "Unknown ActivationFunction::Type");
-    return ReLU(); // fallback
+    return ReLU();
   }
 }
 
