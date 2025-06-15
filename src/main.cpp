@@ -82,7 +82,7 @@ int main() {
 
   for (int e = 0; e < epochs; ++e) {
     double running_loss = 0.0;
-    for (int i = 0; i < static_cast<int>(train_images.size()); ++i) {
+    for (int i = 0; i < int(train_images.size()); ++i) {
       model.trainStep(train_images[i], train_targets[i], LossFunction::mseGrad,
                       opt);
       Vector out = model.forward(train_images[i]);
@@ -107,7 +107,7 @@ int main() {
 
     double val_loss = 0.0;
     int correct = 0;
-    for (int i = 0; i < static_cast<int>(test_images.size()); ++i) {
+    for (int i = 0; i < int(test_images.size()); ++i) {
       Vector out = model.forward(test_images[i]);
       val_loss += LossFunction::mse(out, test_targets[i]);
 
