@@ -1,12 +1,13 @@
 #include "Utilities/FileWriter.h"
 #include "Layers/Layer.h"
 #include "Model/Model.h"
-#include <cassert>
+
+#include <stdexcept>
 
 namespace neural_network {
 
 FileWriter::FileWriter(const std::filesystem::path &file) {
-  file_.open(file);
+  file_.open(file, std::ios::out);
   if (!file_.is_open()) {
     throw std::runtime_error("Could not open file for writing.");
   }
@@ -14,24 +15,33 @@ FileWriter::FileWriter(const std::filesystem::path &file) {
 
 FileWriter::~FileWriter() { file_.close(); }
 
-template <> FileWriter &FileWriter::operator<<(const std::string &s) {
-  file_ << s << '\n';
-  return *this;
-}
-
-template <typename T>
-FileWriter &operator<<(FileWriter &w, const std::vector<T> &v) {
+FileWriter &operator<<(FileWriter &w, const Vector &v) {
   w << v.size();
-  for (const auto &item : v) {
-    w << item;
-  }
+  for (Index i = 0; i < v.size(); ++i)
+    w << v[i];
   return w;
 }
 
-FileWriter &operator<<(FileWriter &w, const Model &m) { return w << m.layers_; }
+FileWriter &operator<<(FileWriter &w, const Matrix &m) {
+  w << m.rows() << m.cols();
+  for (Index i = 0; i < m.rows(); ++i)
+    for (Index j = 0; j < m.cols(); ++j)
+      w << m(i, j);
+  return w;
+}
 
 FileWriter &operator<<(FileWriter &w, const Layer &l) {
-  return w << l.weights_ << l.biases_ << l.activation_;
+  w << l.weights_ << l.biases_;
+  w << static_cast<int>(l.activation_type_);
+  return w;
+}
+
+FileWriter &operator<<(FileWriter &w, const Model &m) {
+  w << m.layers_.size();
+  for (const auto &layer : m.layers_) {
+    w << layer;
+  }
+  return w;
 }
 
 } // namespace neural_network
