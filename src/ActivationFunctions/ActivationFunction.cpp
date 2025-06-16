@@ -51,6 +51,20 @@ ActivationFunction ActivationFunction::Tanh() {
       });
 }
 
+ActivationFunction ActivationFunction::Softmax() {
+  auto apply = [](const Vector &x) -> Vector {
+    Vector shifted = x.array() - x.maxCoeff();
+    Vector exps = shifted.array().exp();
+    return exps / exps.sum();
+  };
+
+  auto derivative = [](const Vector &x) -> Vector {
+    return Vector::Ones(x.size());
+  };
+
+  return ActivationFunction(apply, derivative);
+}
+
 ActivationFunction ActivationFunction::create(Type type) {
   switch (type) {
   case Type::ReLU:
@@ -61,6 +75,8 @@ ActivationFunction ActivationFunction::create(Type type) {
     return Identity();
   case Type::Tanh:
     return Tanh();
+  case Type::Softmax:
+    return Softmax();
   default:
     assert(false && "Unknown ActivationFunction::Type");
     return ReLU();

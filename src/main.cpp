@@ -41,8 +41,8 @@ int main() {
 
   std::cout << "Select model architecture:\n";
   std::cout << "1. One hidden layer (ReLU + Identity)\n";
-  std::cout << "2. Two hidden layers (Sigmoid + ReLU + Identity)\n";
-  std::cout << "3. Three hidden layers (Tanh + Sigmoid + ReLU + Identity)\n";
+  std::cout << "2. Two hidden layers (ReLU + Sigmoid + Identity)\n";
+  std::cout << "3. Three hidden layers (ReLU + Sigmoid + Tanh + Softmax)\n";
   int choice;
   std::cout << "Enter choice (1/2/3): ";
   std::cin >> choice;
@@ -57,15 +57,15 @@ int main() {
           ? Model({784, 128, 10}, {ActivationFunction::Type::ReLU,
                                    ActivationFunction::Type::Identity})
       : (choice == 2)
-          ? Model({784, 64, 64, 10}, {ActivationFunction::Type::Sigmoid,
-                                      ActivationFunction::Type::ReLU,
+          ? Model({784, 64, 64, 10}, {ActivationFunction::Type::ReLU,
+                                      ActivationFunction::Type::Sigmoid,
                                       ActivationFunction::Type::Identity})
-          : Model({784, 32, 32, 32, 10}, {ActivationFunction::Type::Tanh,
+          : Model({784, 32, 32, 32, 10}, {ActivationFunction::Type::ReLU,
                                           ActivationFunction::Type::Sigmoid,
-                                          ActivationFunction::Type::ReLU,
-                                          ActivationFunction::Type::Identity});
+                                          ActivationFunction::Type::Tanh,
+                                          ActivationFunction::Type::Softmax});
 
-  Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
+  Optimizer opt = Optimizer::Adam(0.0003, 0.9, 0.999, 1e-8);
 
   std::ofstream train_loss_file("loss_" + model_name + "_train.csv");
   std::ofstream val_loss_file("loss_" + model_name + "_val.csv");
@@ -83,19 +83,25 @@ int main() {
   for (int e = 0; e < epochs; ++e) {
     double running_loss = 0.0;
     for (int i = 0; i < int(train_images.size()); ++i) {
-      model.trainStep(train_images[i], train_targets[i], LossFunction::mseGrad,
-                      opt);
-      Vector out = model.forward(train_images[i]);
-      running_loss += LossFunction::mse(out, train_targets[i]);
+      if (choice == 3) {
+        model.trainStep(train_images[i], train_targets[i],
+                        LossFunction::crossEntropyGrad, opt);
+        Vector out = model.forward(train_images[i]);
+        running_loss += LossFunction::crossEntropy(out, train_targets[i]);
+      } else {
+        model.trainStep(train_images[i], train_targets[i],
+                        LossFunction::mseGrad, opt);
+        Vector out = model.forward(train_images[i]);
+        running_loss += LossFunction::mse(out, train_targets[i]);
+      }
 
       float fraction = float(i + 1) / train_images.size();
       int pos = int(barWidth * fraction);
       int percent = int(fraction * 100.0f);
 
       std::cout << "\r[";
-      for (int j = 0; j < barWidth; ++j) {
+      for (int j = 0; j < barWidth; ++j)
         std::cout << (j < pos ? '=' : ' ');
-      }
       std::cout << "] " << std::setw(3) << percent << "% "
                 << "(" << (i + 1) << "/" << train_images.size() << ") "
                 << "L:" << std::fixed << std::setprecision(4)
@@ -109,7 +115,10 @@ int main() {
     int correct = 0;
     for (int i = 0; i < int(test_images.size()); ++i) {
       Vector out = model.forward(test_images[i]);
-      val_loss += LossFunction::mse(out, test_targets[i]);
+      if (choice == 3)
+        val_loss += LossFunction::crossEntropy(out, test_targets[i]);
+      else
+        val_loss += LossFunction::mse(out, test_targets[i]);
 
       Eigen::Index predIndex;
       out.maxCoeff(&predIndex);

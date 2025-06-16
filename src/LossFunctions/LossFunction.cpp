@@ -16,13 +16,14 @@ Vector LossFunction::mseGrad(const Vector &y_pred, const Vector &y_true) {
 
 double LossFunction::crossEntropy(const Vector &y_pred, const Vector &y_true) {
   assert(y_pred.size() == y_true.size());
-  return -(y_true.array() * y_pred.array().log()).sum();
+  const double epsilon = 1e-12;
+  return -(y_true.array() * (y_pred.array() + epsilon).log()).sum();
 }
 
 Vector LossFunction::crossEntropyGrad(const Vector &y_pred,
                                       const Vector &y_true) {
   assert(y_pred.size() == y_true.size());
-  return -y_true.array() / y_pred.array();
+  return y_pred - y_true;
 }
 
 } // namespace neural_network
