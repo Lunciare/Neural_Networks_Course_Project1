@@ -7,9 +7,12 @@
 #include "Utilities/Random.h"
 #include "Utilities/Utils.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <numeric>
+#include <random>
 
 using namespace neural_network;
 
@@ -42,7 +45,7 @@ int main() {
   std::cout << "Select model architecture:\n";
   std::cout << "1. One hidden layer (ReLU + Identity)\n";
   std::cout << "2. Two hidden layers (ReLU + Sigmoid + Identity)\n";
-  std::cout << "3. Three hidden layers (ReLU + Sigmoid + Tanh + Softmax)\n";
+  std::cout << "3. Three hidden layers (ReLU + ReLU + ReLU + Softmax)\n";
   int choice;
   std::cout << "Enter choice (1/2/3): ";
   std::cin >> choice;
@@ -60,12 +63,12 @@ int main() {
           ? Model({784, 64, 64, 10}, {ActivationFunction::Type::ReLU,
                                       ActivationFunction::Type::Sigmoid,
                                       ActivationFunction::Type::Identity})
-          : Model({784, 32, 32, 32, 10}, {ActivationFunction::Type::ReLU,
-                                          ActivationFunction::Type::Sigmoid,
-                                          ActivationFunction::Type::Tanh,
-                                          ActivationFunction::Type::Softmax});
+          : Model({784, 128, 64, 32, 10}, {ActivationFunction::Type::ReLU,
+                                           ActivationFunction::Type::ReLU,
+                                           ActivationFunction::Type::ReLU,
+                                           ActivationFunction::Type::Softmax});
 
-  Optimizer opt = Optimizer::Adam(0.0003, 0.9, 0.999, 1e-8);
+  Optimizer opt = Optimizer::Adam(0.001, 0.9, 0.999, 1e-8);
 
   std::ofstream train_loss_file("loss_" + model_name + "_train.csv");
   std::ofstream val_loss_file("loss_" + model_name + "_val.csv");
@@ -80,19 +83,28 @@ int main() {
   std::cout << "\n=== Training " << model_name << " for " << epochs
             << " epoch(s) ===\n";
 
+  std::default_random_engine rng(std::random_device{}());
+
   for (int e = 0; e < epochs; ++e) {
+    // Shuffle indices
+    std::vector<int> indices(train_images.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    std::shuffle(indices.begin(), indices.end(), rng);
+
     double running_loss = 0.0;
     for (int i = 0; i < int(train_images.size()); ++i) {
+      int idx = indices[i];
+
       if (choice == 3) {
-        model.trainStep(train_images[i], train_targets[i],
+        model.trainStep(train_images[idx], train_targets[idx],
                         LossFunction::crossEntropyGrad, opt);
-        Vector out = model.forward(train_images[i]);
-        running_loss += LossFunction::crossEntropy(out, train_targets[i]);
+        Vector out = model.forward(train_images[idx]);
+        running_loss += LossFunction::crossEntropy(out, train_targets[idx]);
       } else {
-        model.trainStep(train_images[i], train_targets[i],
+        model.trainStep(train_images[idx], train_targets[idx],
                         LossFunction::mseGrad, opt);
-        Vector out = model.forward(train_images[i]);
-        running_loss += LossFunction::mse(out, train_targets[i]);
+        Vector out = model.forward(train_images[idx]);
+        running_loss += LossFunction::mse(out, train_targets[idx]);
       }
 
       float fraction = float(i + 1) / train_images.size();
