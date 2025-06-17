@@ -60,9 +60,9 @@ int main() {
           ? Model({784, 128, 10}, {ActivationFunction::Type::ReLU,
                                    ActivationFunction::Type::Identity})
       : (choice == 2)
-          ? Model({784, 64, 64, 10}, {ActivationFunction::Type::ReLU,
-                                      ActivationFunction::Type::Sigmoid,
-                                      ActivationFunction::Type::Identity})
+          ? Model({784, 128, 64, 10}, {ActivationFunction::Type::ReLU,
+                                       ActivationFunction::Type::Sigmoid,
+                                       ActivationFunction::Type::Identity})
           : Model({784, 128, 64, 32, 10}, {ActivationFunction::Type::ReLU,
                                            ActivationFunction::Type::ReLU,
                                            ActivationFunction::Type::ReLU,
