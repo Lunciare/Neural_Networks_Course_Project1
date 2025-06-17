@@ -10,7 +10,7 @@ This project implements a fully connected neural network from scratch in C++ usi
 - Custom implementation of:
   - Forward and backward propagation
   - Optimizers (SGD, Adam)
-  - Activation functions (ReLU, Sigmoid, Tanh, Identity)
+  - Activation functions (ReLU, Sigmoid, Tanh, Softmax, Identity)
   - Loss functions (MSE, Cross-Entropy)
 - Data loading for the MNIST dataset
 - Test accuracy evaluation
