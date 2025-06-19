@@ -1,0 +1,27 @@
+# Компилируемые бинарные файлы
+*.exe
+*.out
+*.obj
+*.o
+*.dll
+*.so
+*.dylib
+
+# Директории сборки
+/build/
+/bin/
+/lib/
+
+# Файлы IDE
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.vscode/
+.idea/
+
+# Кэш
+*.cache
+*.pch
+
+NeuralNetworkGUI/NeuralNetworkGUI.pro.user
