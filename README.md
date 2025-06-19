@@ -2,8 +2,6 @@
 
 This project implements a fully connected neural network from scratch in C++ using the MNIST dataset for training and evaluation. The implementation includes customizable activation functions, optimizers (SGD, Adam), and loss functions (MSE, Cross-Entropy).
 
-> **Note**: All source files are located on the `dev` branch. Please switch to the `dev` branch to access the complete implementation.
-
 ## Features
 
 - Written in C++ with Eigen and EigenRand libraries
@@ -11,7 +9,7 @@ This project implements a fully connected neural network from scratch in C++ usi
   - Forward and backward propagation
   - Optimizers (SGD, Adam)
   - Activation functions (ReLU, Sigmoid, Tanh, Softmax, Identity)
-  - Loss functions (MSE, Cross-Entropy)
+  - Loss functions (MSE, Cross Entropy)
 - Data loading for the MNIST dataset
 - Test accuracy evaluation
 - Logging training loss to `loss.csv`
